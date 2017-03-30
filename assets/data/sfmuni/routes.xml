@@ -69,17 +69,16 @@
 <route tag="66" title="66-Quintara"/>
 <route tag="67" title="67-Bernal Heights"/>
 <route tag="76X" title="76X-Marin Headlands Express"/>
-<route tag="81X" title="81X-Caltrain Express"/>
 <route tag="82X" title="82X-Levi Plaza Express"/>
 <route tag="83X" title="83X-Mid-Market Express"/>
 <route tag="88" title="88-Bart Shuttle"/>
 <route tag="90" title="90-San Bruno Owl"/>
 <route tag="91" title="91-Owl"/>
-<route tag="K_OWL" title="K-Owl"/>
-<route tag="L_OWL" title="L-Owl"/>
-<route tag="M_OWL" title="M-Owl"/>
-<route tag="N_OWL" title="N-Owl"/>
-<route tag="T_OWL" title="T-Owl"/>
+<route tag="K-OWL" title="K-Owl"/>
+<route tag="L-OWL" title="L-Owl"/>
+<route tag="M-OWL" title="M-Owl"/>
+<route tag="N-OWL" title="N-Owl"/>
+<route tag="T-OWL" title="T-Owl"/>
 <route tag="59" title="Powell/Mason Cable Car"/>
 <route tag="60" title="Powell/Hyde Cable Car"/>
 <route tag="61" title="California Cable Car"/>

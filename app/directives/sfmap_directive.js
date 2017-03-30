@@ -31,8 +31,8 @@
 	function load(map_svg,projection,z)
 	{
 		var data_loc =[];
-		data_loc[1]='Assets/Data/sfmaps/neighborhoods.json';
-		data_loc[0]='Assets/Data/sfmaps/streets.json';
+		data_loc[1]='assets/data/sfmaps/neighborhoods.json';
+		data_loc[0]='assets/data/sfmaps/streets.json';
 
 		var sources = ['streets','neighborhoods'];
 		
@@ -44,6 +44,7 @@
 							d3.json(source,callback);
 						})
 					})
+
 		q.awaitAll(function(error,results){
 			for ( var a = 0 ; a<results.length ;a++)
 			{
@@ -97,6 +98,7 @@
 	var inbound_direction_path =[];
 	inbound_direction_path[0]=[];
 	
+	if(!inbound_direction){ console.log(results)};
 	var nodes_i = inbound_direction.querySelectorAll('stop');
 	for ( var a = 0 ; a<nodes_i.length ;a++)
 	{
@@ -160,7 +162,7 @@ sfmuniapp.directive('sfMapDir',function(){
 			{
 
 			var map_svg = mapsvg;
-			d3.xml('Assets/Data/sfmuni/routes.xml',function(data_outer)
+			d3.xml('assets/data/sfmuni/routes.xml',function(data_outer)
 			{
 					data_outer = [].map.call(data_outer.querySelectorAll("route"), function(route) 
 						{ return{
@@ -171,9 +173,9 @@ sfmuniapp.directive('sfMapDir',function(){
 						});
 
 					var muni_data_loc=[];
-					for ( var m_c =0 ; m_c<7 ;m_c++)
+					for ( var m_c =0 ; m_c<data_outer.length ;m_c++)
 					{
-						var loc = "Assets/Data/sfmuni/muni_"+data_outer[m_c].id+".xml";
+						var loc = "assets/data/sfmuni/muni_"+data_outer[m_c].id+".xml";
 						muni_data_loc.push(loc);
 					}
 
@@ -192,7 +194,6 @@ sfmuniapp.directive('sfMapDir',function(){
 						for (var r_c = 0 ; r_c < results.length ;r_c++)
 						{
 							info = route_info(results[r_c]);
-
 							var stops_draw= stops_map.append("g")
 												.attr("z",2)
 												.attr("id",'stops_'+info.tag);
@@ -222,11 +223,11 @@ sfmuniapp.directive('sfMapDir',function(){
           								var id = info.tag.split('_')[0]
           								if(vehicletag == id)
           								{
-          									return 4;
+          									return 3;
           								}
           								else 
           								{
-          									return 3;
+          									return 0.5;
           								}
           							})
           							.attr("stroke-opacity",function(d)
@@ -238,24 +239,26 @@ sfmuniapp.directive('sfMapDir',function(){
           								}
           								else 
           								{
-          									return 0.2;
+          									return 0.7;
           								}
           							})
           							.attr("points",function(d) {return d;})
           							.attr("stroke",'#'+info.col);
 
-          					stops_draw.append("g")
-          							.attr("class","inbound")
-          							.attr("id",'inbound_'+info.tag)
-          							.selectAll("polyline")
-									.data(info.inbound_path)
-									.enter()
-          							.append("polyline")
-          							.attr("class","inbound_path")
-          							.attr("stroke-width",3.0)
-          							.attr("stroke-opacity",0.2)
-          							.attr("points",function(d) {return d;})
-          							.attr("stroke",'#'+info.col);
+
+         /************ Activate with button CLICK *******************/
+         //  					stops_draw.append("g")
+         //  							.attr("class","inbound")
+         //  							.attr("id",'inbound_'+info.tag)
+         //  							.selectAll("polyline")
+									// .data(info.inbound_path)
+									// .enter()
+         //  							.append("polyline")
+         //  							.attr("class","inbound_path")
+         //  							.attr("stroke-width",2.0)
+         //  							.attr("stroke-opacity",0.2)
+         //  							.attr("points",function(d) {return d;})
+         //  							.attr("stroke",'#'+info.col);
 
 
 						}

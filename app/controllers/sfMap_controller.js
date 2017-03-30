@@ -10,7 +10,7 @@ sfmuniapp.controller('sfMapController',function sfMapController($q,$scope,$http,
 	$scope.vehicletag='L';
 	
 	
-	d3.json('Assets/Data/sfmaps/neighborhoods.json',function(err,data){
+	d3.json('assets/data/sfmaps/neighborhoods.json',function(err,data){
 					var width = 2*window.innerWidth/3;
 					var height = 2*window.innerWidth/3;
 					var margin = 20;
@@ -26,14 +26,7 @@ sfmuniapp.controller('sfMapController',function sfMapController($q,$scope,$http,
 	// $scope.xml_data=null;
 	// var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
 
-	// var ast =d3.request(cur_loc_url)
-	// 	.mimeType("text/plain")
-	// 	.response(function(xhr){
-	// 		return(xhr.responseXML);
-	// 	})
-	// 	// .get(callback)
-
-	// console.log(ast.response);
+	
 
 
 
@@ -46,16 +39,17 @@ sfmuniapp.controller('sfMapController',function sfMapController($q,$scope,$http,
 
 	
 	// Getting Vehicle Data
-	// function call_current_api()
-	// {
-	// var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
-	// d3.xml(cur_loc_url,function(err,data){
-	// 	$scope.vehicledata=data;
-	// 	$scope.$apply();
-	// })
-	// }
+	function call_current_api()
+	{
+	var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
+	d3.xml(cur_loc_url,function(err,data){
+		$scope.vehicledata=data;
+		console.log((data))
+		$scope.$apply();
+	})
+	}
 
-	// call_current_api();
+	call_current_api();
 	// setInterval(function(){
 	// 	call_current_api();
 	// },15000)

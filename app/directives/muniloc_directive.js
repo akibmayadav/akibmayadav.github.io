@@ -96,7 +96,8 @@ sfmuniapp.directive('muniLocation',function(){
                                         .attr("id",function(d){return d.id})
                                         .attr('cx',function(d){return d.old_x})
                                         .attr('cy',function(d){return d.old_y})
-                                        .attr('r',5)
+                                        .attr('r',2)
+                                        .attr("fill","white")
                                         .on("mouseover",function(d){
                                             show_id(d);
                                         })
