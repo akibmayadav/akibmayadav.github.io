@@ -1,7 +1,7 @@
 var sfmuniapp = angular.module('sfMap',[]);
 
 /***************************  Controller Starts ***************************/
-sfmuniapp.controller('sfMapController',function sfMapController($scope,$http,$element){
+sfmuniapp.controller('sfMapController',function sfMapController($q,$scope,$http,$element){
 
 	
 	$scope.projection = null;
@@ -22,7 +22,21 @@ sfmuniapp.controller('sfMapController',function sfMapController($scope,$http,$el
 
 			});
 
-	
+	// $scope.getMuniData = call_current_api();
+	// $scope.xml_data=null;
+	// var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
+
+	// var ast =d3.request(cur_loc_url)
+	// 	.mimeType("text/plain")
+	// 	.response(function(xhr){
+	// 		return(xhr.responseXML);
+	// 	})
+	// 	// .get(callback)
+
+	// console.log(ast.response);
+
+
+
 	// Setting Up Current Clock
 	setInterval(function(){
 		var d = new Date();
@@ -30,21 +44,21 @@ sfmuniapp.controller('sfMapController',function sfMapController($scope,$http,$el
 		$scope.$apply();
 	},1000);
 
-	$scope.getMuniData = call_current_api();
-	//Getting Vehicle Data
-	function call_current_api()
-	{
-	var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
-	d3.xml(cur_loc_url,function(err,data){
-		$scope.vehicledata=data;
-		$scope.$apply();
-	})
-	}
+	
+	// Getting Vehicle Data
+	// function call_current_api()
+	// {
+	// var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
+	// d3.xml(cur_loc_url,function(err,data){
+	// 	$scope.vehicledata=data;
+	// 	$scope.$apply();
+	// })
+	// }
 
-	call_current_api();
-	setInterval(function(){
-		call_current_api();
-	},15000)
+	// call_current_api();
+	// setInterval(function(){
+	// 	call_current_api();
+	// },15000)
 
 
 	var width = 2*window.innerWidth/3;
