@@ -42,12 +42,26 @@ sfmuniapp.controller('sfMapController',function sfMapController($q,$scope,$http,
 	function call_current_api()
 	{
 	var cur_loc_url = "http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=sf-muni&r="+$scope.vehicletag+"&t=0";
-	d3.xml(cur_loc_url,function(err,data){
-		$scope.vehicledata=data;
-		console.log((data))
+	$.ajax({
+        crossOrigin: true,
+        url: cur_loc_url,
+        success: function(data) {
+        	console.log("call was made for "+cur_loc_url);
+            console.log(data);
+            $scope.vehicledata=data;
+	// 	console.log((data))
 		$scope.$apply();
-	})
-	}
+
+        }
+    });
+}
+
+	// d3.xml(cur_loc_url,function(err,data){
+	// 	$scope.vehicledata=data;
+	// 	console.log((data))
+	// 	$scope.$apply();
+	// })
+	// }
 
 	call_current_api();
 	// setInterval(function(){
