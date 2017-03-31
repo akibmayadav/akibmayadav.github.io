@@ -1,3 +1,3 @@
-SF Muni Real Time Mapping Demo 
+## SF Muni Real Time Mapping Demo 
 
 Angular.js / D3.js 
