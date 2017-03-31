@@ -21,3 +21,7 @@ Developed on Angular.js + D3.js
 1. Addition of an interactive Marey's Diagram for SF Muni System . 
 2. Zoom and Pan functionality on Map . 
 3. Selection of multiple routes . 
+
+## Learning
+
+1. D3 visualizations built on Angular framework . 
