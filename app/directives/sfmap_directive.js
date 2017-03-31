@@ -60,7 +60,6 @@
 	var color = data.getAttribute('color');
 	var stops_outer = data.querySelectorAll('stop');
 	var stops =[];
-
 	for ( var s_c = 0 ; s_c<stops_outer.length ;s_c++)
 	{
 		if(stops_outer[s_c].attributes.length>1) //leaving out direction data
@@ -116,7 +115,7 @@
 	output.outbound_path = outbound_direction_path;
 	output.col=color;
 	output.tag = data.getAttribute('tag')+'_muni';
-
+	output.title = data.getAttribute('title');
 	return output;
 
 	}
@@ -132,8 +131,7 @@ sfmuniapp.directive('sfMapDir',function(){
     		scope:
     		{
     			projection : '=',
-    			mapsvg: '=',
-    			vehicletag: '='
+    			mapsvg: '='
     		},
     		link:function(scope,element,attrs)
     		{
@@ -142,26 +140,12 @@ sfmuniapp.directive('sfMapDir',function(){
     		projection = data[0];
     		mapsvg = data[1];
 
-    		if(projection)
-    			{	
+    		if(projection)	
+    		{	
+
 			var map_svg = mapsvg;
 			load(map_svg,projection,0); //Streets and Neighborhoods
-				}
-			});
-
-/***************************  Route Starts ***************************/
-			scope.$watchGroup(['projection','mapsvg','vehicletag'],function(data){
-
-			projection = data[0];
-    		mapsvg = data[1];
-    		vehicletag = data[2];
-
-    		$("#stops").remove();
-
-			if(projection)
-			{
-
-			var map_svg = mapsvg;
+			
 			d3.xml('assets/data/sfmuni/routes.xml',function(data_outer)
 			{
 					data_outer = [].map.call(data_outer.querySelectorAll("route"), function(route) 
@@ -188,6 +172,7 @@ sfmuniapp.directive('sfMapDir',function(){
 						})
 					})
 
+
 					var stops_map = map_svg.append("g")
 											.attr("id","stops");
 					q.awaitAll(function(error,results){
@@ -207,6 +192,7 @@ sfmuniapp.directive('sfMapDir',function(){
 										.attr('cx',function(d){return d.x})
 										.attr('cy',function(d){return d.y})
 										.attr('r',0.5)
+										.attr("opacity",0.3)
 										.attr('id',function(d){return d.title})
 										.attr("fill","black");
 
@@ -218,55 +204,16 @@ sfmuniapp.directive('sfMapDir',function(){
 									.enter()
           							.append("polyline")
           							.attr("class","outbound_path")
-          							.attr("stroke-width",function(d)
-          							{
-          								var id = info.tag.split('_')[0]
-          								if(vehicletag == id)
-          								{
-          									return 3;
-          								}
-          								else 
-          								{
-          									return 0.5;
-          								}
-          							})
-          							.attr("stroke-opacity",function(d)
-          							{
-          								var id = info.tag.split('_')[0]
-          								if(vehicletag == id)
-          								{
-          									return 1.0;
-          								}
-          								else 
-          								{
-          									return 0.7;
-          								}
-          							})
+          							.attr("stroke-width",3.0)
+          							.attr("stroke-opacity",0.2)
           							.attr("points",function(d) {return d;})
           							.attr("stroke",'#'+info.col);
-
-
-         /************ Activate with button CLICK *******************/
-         //  					stops_draw.append("g")
-         //  							.attr("class","inbound")
-         //  							.attr("id",'inbound_'+info.tag)
-         //  							.selectAll("polyline")
-									// .data(info.inbound_path)
-									// .enter()
-         //  							.append("polyline")
-         //  							.attr("class","inbound_path")
-         //  							.attr("stroke-width",2.0)
-         //  							.attr("stroke-opacity",0.2)
-         //  							.attr("points",function(d) {return d;})
-         //  							.attr("stroke",'#'+info.col);
 
 
 						}
 					})
 					
-			});
-
-/***************************  Route Stops ***************************/
+			}); 
 
 			}
 		});

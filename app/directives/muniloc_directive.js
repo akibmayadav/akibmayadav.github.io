@@ -5,11 +5,13 @@ function vehicle_data_parser(vehicle_input,vehicle_old_input)
                         { 
                         var old_present = false; 
                         var vehicle_old=[];
-
+                        var vehicle = vehicle_input.querySelectorAll("vehicle");
                         if(vehicle_old_input)
                             {
-                            old_present=true;
                             var vehicle_older = vehicle_old_input.querySelectorAll("vehicle");
+                            var tag_old = vehicle_older[0].getAttribute('routeTag');
+                            var tag_new = vehicle[0].getAttribute('routeTag');
+                            if(tag_old ==tag_new){old_present= true;}
                             for ( var o_c = 0 ;o_c<vehicle_older.length;o_c++)
                             {
                                 var attr = {};
@@ -18,11 +20,12 @@ function vehicle_data_parser(vehicle_input,vehicle_old_input)
                                 var lon = vehicle_older[o_c].getAttribute('lon');
                                 attr.x = projection([lon,lat])[0];
                                 attr.y = projection([lon,lat])[1];
+                                attr.heading= vehicle_older[o_c].getAttribute('heading');
                                 vehicle_old.push(attr);
                             }
                             };
 
-                        var vehicle = vehicle_input.querySelectorAll("vehicle");
+                        
                         if(vehicle.length)
                         {
                             var out = {};
@@ -37,9 +40,10 @@ function vehicle_data_parser(vehicle_input,vehicle_old_input)
                                 var index = old_present ? vehicle_old.findIndex(x=>x.id==attr.id) : -1;
                                 attr.x = projection([lon,lat])[0];
                                 attr.y = projection([lon,lat])[1];
+                                attr.c_heading = vehicle[v_c].getAttribute('heading');
                                 attr.old_x = old_present ? vehicle_old[index].x : attr.x;
                                 attr.old_y = old_present ? vehicle_old[index].y : attr.y;
-                                attr.heading = vehicle[v_c].getAttribute('heading');
+                                attr.old_heading = old_present ? vehicle_old[index].heading : attr.c_heading;  
                                 out.parseddata.push(attr);        
                             }
                             return(out);
@@ -66,16 +70,18 @@ sfmuniapp.directive('muniLocation',function(){
     		{
     			projection : '=',
     			vehicledata : '=',
-                mapsvg :'='
+                mapsvg :'=',
+                vehicletag:'='
     		},
     		link:function(scope,element,attrs)
     		{
 
-    			scope.$watchGroup(['projection','vehicledata','mapsvg'],function(newData,oldData){
+    			scope.$watchGroup(['projection','vehicledata','mapsvg','vehicletag'],function(newData,oldData){
 
                     var projection = newData[0];
     				var vehicle_old = oldData[1];
                     var vehicle_current = newData[1];
+                    var vehicletag= newData[3];
 
                     if(vehicle_current)
                     {
@@ -87,28 +93,36 @@ sfmuniapp.directive('muniLocation',function(){
                     $("#vehicle_locations").remove();
                     var vehicle_locations = map_svg.append("g")
                                             .attr("id","vehicle_locations")
-                    if(parsed_current_data)
-                    {
-                    vehicle_locations.selectAll("circle")
+                    
+                    var arc = d3.symbol().type(d3.symbolTriangle);
+
+                    vehicle_locations.selectAll("path")
                                         .data(parsed_current_data.parseddata)
                                         .enter()
-                                        .append("circle")
-                                        .attr("id",function(d){return d.id})
-                                        .attr('cx',function(d){return d.old_x})
-                                        .attr('cy',function(d){return d.old_y})
-                                        .attr('r',2)
-                                        .attr("fill","white")
+                                        .append("path")
+                                        .attr("d", arc)
+                                        .attr("transform", function(d) {
+                                                return "translate(" + d.old_x+","+d.old_y+ ") rotate("+d.old_heading+") scale(1.5,2.0)";
+                                            })
+                                        .attr("fill","black")
+                                        .attr("opacity",0.4)
                                         .on("mouseover",function(d){
+                                            d3.select(this).attr("fill","white")
+                                            d3.select(this).attr("opacity","1.0")
                                             show_id(d);
                                         })
                                         .on("mouseout",function(){
+                                            d3.select(this).attr("fill","black")
+                                            d3.select(this).attr("opacity","0.4")
                                             remove_id();
                                         })
                                         .transition()
-                                        .duration(15000)
+                                        .duration(4000)
                                         .ease(d3.easeLinear)
-                                        .attr("cx",function(d){return d.x})
-                                        .attr("cy",function(d){return d.y})
+                                        .attr("transform", function(d) {
+                                                return "translate(" + d.x+","+d.y+ ") rotate("+d.c_heading+") scale(1.5,2.0)";
+                                            })
+                                        
                     }
 
 
@@ -116,6 +130,7 @@ sfmuniapp.directive('muniLocation',function(){
                      {
                         vehicle_locations.append("text")
                                         .text(parsed_current_data.routetag+"-"+d.id)
+                                        .attr("font-size",'15px')
                                         .attr("id","id_text")
                                         .attr("x",d.x)
                                         .attr("y",d.y);
@@ -123,13 +138,11 @@ sfmuniapp.directive('muniLocation',function(){
                      function remove_id()
                      {
                         $('#id_text').remove();
-                     } 
-                     }                 
+                     }                
                     
-
-    			})
+                     })
+    			}
     		}
-    	}
-    });
+    	});
 
 /***************************  Directive muniLocation Ends ***************************/
