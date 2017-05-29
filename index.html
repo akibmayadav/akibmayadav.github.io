@@ -1,69 +1,67 @@
-<!-- ******************************************************************
-
-SF Muni Real Time Location Mapping 
-Author : Ambika Yadav
-https://ambikayadav.com/
-
-README File : https://github.com/akibmayadav/akibmayadav.github.io/blob/master/README.md 
-
-******************************************************************
-
- -->
-
-
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title> SFMuni</title>
-    <script src="app/libraries/d3.min.js"></script>
-    <script src="app/libraries/jquery-3.2.1.min.js"></script>
-    <script src="app/libraries/angular.min.js"></script>
-    <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/interaction.css">
-    <script src="app/controllers/sfmap_controller.js"></script>
-    <script src="app/directives/sfmap_directive.js"></script>
-    <script src="app/directives/muniloc_directive.js"></script>
-    <script src="app/directives/routehigh_directive.js"></script>
-  </head>
-
-  <body>
-    
-
-    <div ng-app='sfMap' ng-controller='sfMapController'>
-      <div id = "inter"></div>
-      <div id="interaction"> 
-
-        <p id="main_heading"> SAN FRANCISCO </p>
-        <p class="sub_heading" style="top:37px"> | Real time muni location mapping |</p>
-        <div id="watch">{{current_time}}</div>
-        
-
-      </div>
-
-      <div id="interaction_2">
-      <div id="button">
-        <ul class="vehicle_selector">
-          <li ng-repeat="n in allroutes"> 
-          <input type="radio" ng-model="model.vehicletag" ng-value="n.tag" name="tag" ng-click="call_current_api()"/>
-            <label ng-style="myStyle={'border-color':n.color}" for="n.tag">{{n.tag}}</label>
-          </li>
-        </ul>
-        
-        <br>
-        <br>
-      </div>
-    </div>
-
-      <sf-map-dir projection='projection' mapsvg='mapsvg' vehicletag='vehicletag' ></sf-map-dir>
-      <muni-location projection='projection' vehicledata='vehicledata' mapsvg='mapsvg' ></muni-location>
-      <routehigh projection='projection' vehicletag='vehicletag' mapsvg='mapsvg'></routehigh>
-      
-    
-    </div>
-    <a id="info" href="https://github.com/akibmayadav/akibmayadav.github.io/blob/master/README.md" style="text-decoration: none;"> &#9432 </a> 
-
-  </body>
+<head>
+<title> CAR Demographics Demo </title>
+<meta charset="UTF-8">
+<meta name ="author" content ="Ambika Yadav"></meta>
+</head>
+<link rel="stylesheet" href="Styles/text.css">
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="Scripts/noframework.waypoints.min.js"></script>
+<body bgcolor="#ffffff">
+<script src="Data/california.js"></script>
+<script src="Data/ethnic_population.js"></script>
 
 
+<!-- SLIDE 1 -->
+<div id ="Slide1" >
+<div id="First_heading" >VISUALIZING HOUSE<br>OWNERSHIP TRENDS IN</div>
+<div id="Bolder_california" >CALIFORNIA</div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="text" id ="Slide2">
+<div> In the year 2000, the population <br> of California was <span style="color:#F2D647"> 33.99 Million</span> <br> Were there enough houses in California? <br> How many more houses need to be build <br> for the growing population? <br></div>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="text" id ="Slide3">
+<div> The population in California has <br> <span style="font-weight:bolder">five</span> major ethnic groups :
+	<span style="color:#095C7E;font-weight:bolder"> Whites </span> <br>
+	<span style="color:#a52969;font-weight:bolder"> Blacks,  </span>
+	<span style="color:#D05555;font-weight:bolder"> Latinos, </span>
+	<span style="color:#43B67A;font-weight:bolder"> Asians, </span>
+	<span style="color:#7CC5C2;font-weight:bolder"> and Others </span> <br>
+</div>
+</div>
+
+<div class="text" id ="Slide4">
+<div> <span style="color:#F2D647"> Different ethnic groups have different <br> houseownership rates, with a section </span> <br>
+<span style="color:#404040;font-weight:bolder"> who don't own houses</span>. <br></div>
+</div>
+
+<div class="text" id ="Slide5">
+<div> On the whole this leads to a high percentage <br> of the population without an owned house. <br> This number has been increasing and is <br> predicted to increase in the future. <br></div>
+</div>
+
+<div class="text" id ="Slide6">
+<div> The resulting houseownership rate of <br>ethnic groups indicates a major lot of non house owners come <br> from the <span style="color:#F2D647;font-weight:bolder"> MINORITIES.</span> <br> </div>
+</div>
+
+<div class="text" id ="Slide7">
+<div> This decrease in house ownership rate is a result of <br> unproportional growth of <br> population of ethnic groups.<br> </div>
+</div>
+
+<div class="text" id ="Slide8">
+<div> The percentage of population <br> <span style="color:#F2D647;font-weight:bolder"> owning a house </span> is expected to decrease <br> from <span style="color:#F2D647;font-weight:bolder"> 57.1% </span> in 2000 to <span style="color:#F2D647;font-weight:bolder"> 44.2% </span> in 2040.<br> </div>
+</div>
+
+<div text-align="center" id ="Slide9" >
+<div> ------------------------------------------<br> </div>
+</div>
+
+<script src="Scripts/slide_functions.js"></script>
+<script src="Scripts/start.js"></script>
+
+</body>
 </html>
