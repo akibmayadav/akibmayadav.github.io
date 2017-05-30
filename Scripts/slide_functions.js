@@ -93,7 +93,7 @@ var square_dimension = function(number)
 
 // INITIAL VARIABLES
 var population_squares = [];
-var year_2000 = ethnicPopulation[4];
+var year_2000 = ethnicPopulation[0];
 
 var whitePop_2000 = {"percent":year_2000.White,"start":0,"end":year_2000.White*12-1,"square":square_dimension(year_2000.White*12),"total":year_2000.White*12};
 var blackPop_2000 = {"percent":year_2000.Black,"start":whitePop_2000.end+1,"end":whitePop_2000.end+(year_2000.Black*12),"square":square_dimension(year_2000.Black*12),"total":year_2000.Black*12};
@@ -764,7 +764,7 @@ var text_for_slide5= function()
 	//HOUSE
 	mainSvg.append("text")
 			.attr("class","slide5_text")
-			.text((ownership_rate[4].own)+"%")
+			.text((ownership_rate[0].own)+"%")
 			.attr("x",0)
 			.attr("y",svgHeight-(square_for_ownership*new_dim_square)-10)
 			.attr("font-family","sans-serif")
@@ -776,7 +776,7 @@ var text_for_slide5= function()
 	//NOHOUSE
 	mainSvg.append("text")
 			.attr("class","slide5_text")
-			.text((100-ownership_rate[4].own)+"%")
+			.text((100-ownership_rate[0].own)+"%")
 			.attr("x",(square_for_ownership*new_dim_square)+30)
 			.attr("y",svgHeight-(square_for_no_ownership*new_dim_square)-10)
 			.attr("font-family","sans-serif")
