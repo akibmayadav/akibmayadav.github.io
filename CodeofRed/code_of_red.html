@@ -10,11 +10,18 @@
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <link rel="stylesheet" href="Styles/main.css">
 <body>
+<div id= "background"></div>
 <div id ="whole_page">
 <div id="mainVisualization"></div>
-<div id="writeup"></div>
+<div id="writeup"><p id= "year_wr"></p></div>
+<div id = "country_name">
+	<svg src = "Assets/arrow.svg" id = "Add"></svg>
+	 	<p id = "country"></p>
+	 <svg src = "Assets/arrow.svg" id = "Sub"></svg>	
 </div>
-<input type="range" name="year-selector" id="year-selector" value="2005" min="1900" max="2005" onchange="year_selector(this.value,i_ind)" ondrag="console.log(this.value)">	
+	<!-- <div id = "years">1920-1930</div> -->
+</div>
+
 
 <script src = "Data/Wars/America_War.js"></script>
 <script src = "Data/Wars/Australia_War.js"></script>
@@ -32,8 +39,7 @@
 <script src = "Scripts/writeup.js"></script>
 <script>
 
-// Background of the visualization
-$('body').css('background-image','url(background.jpg)')
+
 $('body').css('margin',4)
 
 // Data 
@@ -48,11 +54,15 @@ var mainVisualizationCanvas = d3.select("#mainVisualization").append("svg")
      .attr("viewBox","0 0 500 500")
      .attr("class", "mainsvg");
 
-var margin = 20
-$('#mainVisualization').css("width",window.innerHeight-(2*margin));
-$('#mainVisualization').css("height",window.innerHeight-(2*margin));
-$('#mainVisualization').css("top",margin);
-$('#mainVisualization').css("left",margin);
+var margin = 40;
+var main_viz_dim = window.innerHeight-(2*margin);
+var left_pos = (window.innerWidth - main_viz_dim)/2;
+$('#mainVisualization').css("width",main_viz_dim);
+$('#mainVisualization').css("height",main_viz_dim);
+$('#mainVisualization').css("left",left_pos);
+$('#mainVisualization').css("top",margin/4);
+
+
 mainVisualizationCanvas.append("g")
 								.attr("id","Year_Circles");
 mainVisualizationCanvas.append("g")
@@ -62,16 +72,19 @@ mainVisualizationCanvas.append("g")
 
 // Setting Initial Conditions
 var i_ind = 4; // Choosing the first country data
-year_selector(1970,i_ind);
-year_selector(1970,i_ind);
+var s_year = 1900;
+var e_year = 2020; 
+var string_year = s_year + " - " + e_year;
+var year_write = document.getElementById("year_wr")
+year_write.innerHTML = string_year;
+year_selector(s_year,e_year,i_ind);
+year_selector(s_year,e_year,i_ind);
 
-
-function war_draw_data_generator (war_data) 
+function war_draw_data_generator (war_data,start_year,end_year) 
 {
-
 	var data = [];
 	var count = 0;
-	for ( var a = 1900 ; a <= 2016 ; a++)
+	for ( var a = 1900 ; a <= 2020 ; a++)
 	{
 	data.push({"year":a,"wars":0}); 
 	count = count+1;
@@ -88,21 +101,28 @@ function war_draw_data_generator (war_data)
 			data[index].wars += 1;
 		}
 	}
-	return data ;
+
+	var start_i = start_year- 1900; 
+	var end_i = end_year-1900;
+	var final_data = data.slice(start_i,end_i);
+	return final_data ;
 }
 
-function art_draw_data_generator (art_data)
+function art_draw_data_generator (art_data,start_year,end_year)
 {
 	var nest_data = d3.nest()
-						.key(function(d){ return d.artist_name})
-						.key(function(d){ return d.year})
+						.key(function(d){ 
+								return d.artist_name;
+							})
+						.key(function(d){ 
+							return d.year})
 						.entries(art_data);
     return nest_data;
 }
 
 
 // Actual Drawing Functions
-function year_selector(year,index) 
+function year_selector(s_year,e_year,index) 
 {
 	$("#Art_Dots").remove();
 	mainVisualizationCanvas.append("g")
@@ -112,18 +132,13 @@ function year_selector(year,index)
 	var current_war = wars[index];
 	var current_art = arts[index];
 
-	var current_drawing_data = war_draw_data_generator(current_war);
-	var current_art_drawing_data = art_draw_data_generator(current_art);
+	var start_year = parseInt(s_year);
+	var end_year = parseInt(e_year);
 
-	var start_year = parseInt(year);
-	var end_year = start_year+10;
+	var current_drawing_data = war_draw_data_generator(current_war,start_year,end_year);
+	var current_art_drawing_data = art_draw_data_generator(current_art,start_year,end_year);
 	main_visualization(start_year,end_year,current_drawing_data,current_art_drawing_data);
 }
-
-
-// To put the visualization in the center
-// main_visualization(0,(window.innerWidth/2)-(window.innerHeight/2),1923,1933);
-
 
 </script>
 

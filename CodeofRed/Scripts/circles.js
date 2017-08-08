@@ -2,12 +2,10 @@ function main_visualization(start_year,end_year,war_data,art_data)
 {
 // Main Canvas for the visualization
 
-var count = 2017-1900;
+var count = end_year-start_year;
 
 var mainVisualizationDim = 500; 
 
-var start_index = index(start_year);
-var end_index = index(end_year);
 var big_increment = 8;
 
 // Boundary
@@ -23,17 +21,9 @@ var big_increment = 8;
 								.attr("id",function(d,i){return d.year})
 								.attr("r",function(d,i){
 									var radius = 0 ;
-									var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-									//Loop1
-									if(i <= start_index)
-										radius = small_increment*i;
-									//Loop2
-									else if (i > start_index && i<end_index)
-										radius = (small_increment*start_index)+big_increment*(i-start_index);
-									//Loop3
-									else
-										radius = (small_increment*start_index)+(big_increment*(end_index-start_index))+small_increment*(i-end_index);
-									return radius
+									var increment = mainVisualizationDim/(2*count);
+									radius = increment*(i+1);
+									return radius;
 
 								})
 								.attr("fill","none")
@@ -41,7 +31,7 @@ var big_increment = 8;
 								.attr("opacity",0.5)
 								.attr("stroke","black");
 
-						circles.exit().remove("circle")
+				circles.exit().remove("circle")
 
 // War Fill
 				var circles_fill = d3.select("#War_Fillers")
@@ -56,33 +46,15 @@ var big_increment = 8;
 								.attr("id",function(d,i){return d.year+"_filler"})
 								.attr("r",function(d,i){
 									var radius = 0 ;
-									var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10) ;
-									//Loop1
-									if(i < start_index)
-										radius = small_increment*i + (small_increment/2);
-									//Loop2
-									else if (i >= start_index && i<end_index)
-										radius = (small_increment*start_index)+big_increment*(i-start_index) + (big_increment/2);
-									//Loop3
-									else
-										radius = (small_increment*start_index)+(big_increment*(end_index-start_index))+small_increment*(i-end_index) + (small_increment/2);
-									return radius
+									var increment = mainVisualizationDim/(2*count);
+									radius = increment*i + (increment/2);
+									return radius;
 
 								})
 								.attr("fill","none")
 								.attr("stroke-width",function(d,i){
-									var width = 0 ;
-									var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-									//Loop1
-									if(i < start_index)
-										width = small_increment;
-									//Loop2
-									else if (i >= start_index && i<end_index)
-										width = big_increment;
-									//Loop3
-									else
-										width = small_increment;
-									return width;
+									var increment = mainVisualizationDim/(2*count);
+									return increment;
 
 								})
 								.attr("opacity",function(d,i){
@@ -90,7 +62,7 @@ var big_increment = 8;
 								})
 								.attr("stroke","#b2332a");
 
-					circles_fill.exit().remove('circle')
+				circles_fill.exit().remove('circle')
 
 // Art Dots 
 
@@ -117,7 +89,17 @@ var big_increment = 8;
 				// circles for every active year, every artist
 				var art_dots_2 = art_dots_1.selectAll("circle")
 												.data(function(d,i){
-													return d.values})
+													var circle_data = [];
+													// console.log(d.values);
+													for ( var c = 0; c < d.values.length ;c++)
+													{
+														var year = d.values[c].key ;
+														if ( year>= start_year && year<end_year)
+														{
+															circle_data.push(d.values[c])
+														}
+													}
+													return circle_data})
 												.enter()
 												.append("circle")
 												.attr("id",function(d,i){
@@ -126,72 +108,29 @@ var big_increment = 8;
 													var year = parseInt(d.key);
 													var x = 0; 
 													var y = 0;
-													var ind = index(year);
-													var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-													//Loop1
-													if(year < start_year)
-													x = small_increment*ind; 
-													//Loop2
-													else if (year >= start_year && year<end_year)
-													x = (small_increment*start_index)+big_increment*(ind-start_index);
-													//Loop3
-													else
-													x = (small_increment*start_index)+(big_increment*(end_index-start_index))+small_increment*(ind-end_index);
-													
-													var final = "translate(" + x +"," +y +")" ;
+													var ind = year-start_year;
+													var radius = 0 ;
+													var increment = mainVisualizationDim/(2*count);
+													radius = increment*ind + (increment/2);	
+													var final = "translate(" + radius +"," +y +")" ;
 													return final;
 												})					
 												.attr("cx",function(d,i){
-													var year_i = index(parseInt(d.key));
-													var radius = 0 ;
-													var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-													//Loop1
-													if(year_i < start_index)
-													radius = small_increment
-													//Loop2
-													else if (year_i >= start_index && year_i<end_index)
-													radius = big_increment;
-													//Loop3
-													else
-													radius = small_increment;
-													return radius/4;
+													var increment = mainVisualizationDim/(2*count);
+													return 0;
 												})
 												.attr("cy",function(d,i){
-													var year_i = index(parseInt(d.key));
-													var radius = 0 ;
-													var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-													//Loop1
-													if(year_i < start_index)
-													radius = small_increment
-													//Loop2
-													else if (year_i >= start_index && year_i<end_index)
-													radius = big_increment;
-													//Loop3
-													else
-													radius = small_increment;
-													return radius/4;
+													var increment = mainVisualizationDim/(2*count);
+													return 0;
 												})
 												.attr("r",function(d,i){
-													var year_i = index(parseInt(d.key));
-													var radius = 0 ;
-													var small_increment = (mainVisualizationDim/2 - big_increment*10)/(count-10);
-													//Loop1
-													if(year_i < start_index)
-													radius = small_increment
-													//Loop2
-													else if (year_i >= start_index && year_i<end_index)
-													radius = big_increment;
-													//Loop3
-													else
-													radius = small_increment;
-													return radius/4;
+													var increment = mainVisualizationDim/(2*count);
+													return increment/4;
 												})
 												.attr("fill","black")
 												.attr("opacity",function(d,i){
 													var num = d.values.length;
 													return num/7;
 												});
-									
-function index(year){ return year-1900;}
 
 }
