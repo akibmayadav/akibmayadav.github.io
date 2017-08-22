@@ -26,6 +26,20 @@ Does the weather in Seattle really effect people and their activities, or is it 
 
 <script>
 
+var current_url = window.location.href;
+var parameter_string = current_url.split("?")[1];
+
+var click = 0; 
+var number_of_clicks =0;
+
+if(parameter_string){
+	click = parseInt(parameter_string.split("=")[1]);
+	var number_of_clicks = (click==0) ? 0:click; 
+	console.log(number_of_clicks);
+	intro_v1();
+}
+
+
 var years = 8; 
 var dewey = 12;
 
@@ -80,7 +94,6 @@ for ( var y = 0 ; y<years ;y++){
 	}
 }
 
-var number_of_clicks = 0; 
 function intro_v1()
 {
 	number_of_clicks++;
@@ -91,12 +104,11 @@ function intro_v1()
 	}
 	else if (number_of_clicks == 2)
 	{
+		$("#main_image").css("opacity",0.0);
 		$("#description").css("opacity",0.0);
 		$("#arrow").css("opacity",0.0);
 		$("#buttons_for_each_viz").css("opacity",1.0);
 	}
-	
-	console.log(number_of_clicks);
 }
 
 
