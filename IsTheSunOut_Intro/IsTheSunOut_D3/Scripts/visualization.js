@@ -210,9 +210,22 @@ mainVisualizationCanvas.append("g")
 					var alpha = "rgba(125, 198, 232, "+ prep_scale(d.prep) +")";
 					return alpha;
 				})
-				.attr("stroke","#7dc6e8")
-				.attr("stroke-width", 0.2)
-				.attr("stroke-opacity",0.1)
+				.attr("stroke",function(d,i){
+					var day = new Date(d.Date).getDay();
+					var color = "#7dc6e8";
+					if(day == 0) color = "black";
+					return color;})
+				.attr("stroke-width", function(d,i){
+					var day = new Date(d.Date).getDay();
+					var width = 0.3;
+					if(day == 0) width = 1.5;
+					return width;})
+				.attr("stroke-opacity",function(d,i){
+					var day = new Date(d.Date).getDay();
+					var opacity = 0.1;
+					if(day == 0) opacity = 0.15;
+					return opacity;
+				})
 				.on("mouseover",function(d){
 					d3.select(this).attr("fill","rgba(0,0,0,1.0)");
 					$("#date_tool").text(d.Date+" | "+d.Checkouts[dew])
@@ -360,7 +373,7 @@ function dewey_checkout(dewey,color)
 						.attr("id","temp_prep_tool")	
 						.attr("text-anchor","middle")	
 						.text(" ") // Updated on 245
-						.attr("y",-50)
+						.attr("y",-30)
 
 			inner_circle.append("line")	
 						.attr("stroke-width",1)	
