@@ -1,0 +1,51 @@
+<html>
+<head>
+<title> MAIN_CODE_OF_RED</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-color.v0.5.min.js"></script>
+<script src="https://d3js.org/d3-hsv.v0.0.min.js"></script>
+<script src="https://unpkg.com/react@15/dist/react.min.js"></script>
+<script src="https://unpkg.com/react-dom@15/dist/react-dom.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<link rel="stylesheet" href="Styles/main.css">
+<body>
+<div id= "background"></div>
+<div id ="whole_page">
+<div id="mainVisualization"></div>	
+<script>
+
+
+
+// Initial Visualization Setup
+var mainVisualizationCanvas = d3.select("#mainVisualization").append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 500 500")
+     .attr("class", "mainsvg");
+
+var margin = 10;
+var left_margin = 20;
+var main_viz_dim = window.innerHeight-(2*margin);
+var write_up_width = 0.7*main_viz_dim;
+
+var left_over_space = window.innerWidth - (1.7*main_viz_dim) - margin; 
+var total_width =  main_viz_dim * 1.7; 
+
+if(left_over_space>0)
+{
+	left_margin = left_over_space/2;
+}
+
+var left_pos = (window.innerWidth - main_viz_dim)/2;
+$('#mainVisualization').css("width",main_viz_dim);
+$('#mainVisualization').css("height",main_viz_dim);
+$('#mainVisualization').css("left",left_margin);
+$('#mainVisualization').css("top",margin);
+
+
+
+</script>
+
+</body>
+</html>

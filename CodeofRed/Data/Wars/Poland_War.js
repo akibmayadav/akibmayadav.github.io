@@ -23,16 +23,5 @@ var Poland_War= [
 	{"end_year": "1968", "start_year": "1968", "war_name": "Invasion of Czechoslovakia"},
 	{"end_year": "1989", "start_year": "1975", "war_name": "Angolan Civil War"},
 	{"end_year": "1991", "start_year": "1990", "war_name": "Gulf War"},
-	{"end_year": "1995", "start_year": "1994", "war_name": "Operation Uphold Democracy"},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "1995", "start_year": "1994", "war_name": "Operation Uphold Democracy"}
 ]

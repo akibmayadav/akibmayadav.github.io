@@ -9,6 +9,10 @@ var mainVisualizationDim = 500;
 var big_increment = 8;
 
 // Boundary
+			var tooltip = d3.select("body").append("div")
+    					 .attr("class", "tooltip")
+   						 .style("opacity", 0);
+
 			var circles = d3.select('#Year_Circles')
 						     .selectAll("circle")
 						     .data(war_data);
@@ -34,6 +38,7 @@ var big_increment = 8;
 				circles.exit().remove("circle")
 
 // War Fill
+
 				var circles_fill = d3.select("#War_Fillers")
 									.selectAll("circle")
 								    .data(war_data);
@@ -58,7 +63,8 @@ var big_increment = 8;
 
 								})
 								.attr("opacity",function(d,i){
-									return d.wars/5;
+									return d.wars/5
+
 								})
 								.attr("stroke","#b2332a");
 
@@ -128,9 +134,38 @@ var big_increment = 8;
 													return increment/4;
 												})
 												.attr("fill","black")
+												.on("mouseover",mouseover_function)
+												.on("mouseout",mouseout_function)
 												.attr("opacity",function(d,i){
 													var num = d.values.length;
 													return num/7;
 												});
+
+
+
+			function mouseover_function(d)
+			{
+				tooltip.transition()
+         			.duration(100)
+         			.style("opacity", .9);
+
+				var artist_name_line = "<span id='ArtistName'>"+d.values[0].artist_name + " ( "+d.key+" ) " +"</span>";
+				var l = d.values.length;
+				var arts = "\n";
+				for ( var a = 0 ; a<l;a++) {
+					arts = arts + d.values[a].art_name + "<br>";
+				}
+
+				tooltip.html(artist_name_line+"<br>"+arts)
+         		.style("left", (d3.event.pageX) + "px")
+         		.style("top", (d3.event.pageY - 28) + "px");
+			}
+
+			function mouseout_function(d)
+			{
+				tooltip.transition()
+         			.duration(100)
+         			.style("opacity", 0);
+			}
 
 }

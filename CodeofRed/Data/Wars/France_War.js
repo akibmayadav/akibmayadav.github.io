@@ -13,7 +13,6 @@ var France_War= [
 	{"end_year": "1962", "start_year": "1954", "war_name": "Algerian War"},
 	{"end_year": "1957", "start_year": "1956", "war_name": "Suez War"},
 	{"end_year": "1958", "start_year": "1957", "war_name": "Ifni War"},
-	{"end_year": "1962", "start_year": "1954", "war_name": "Algerian War"},
 	{"end_year": "1991", "start_year": "1975", "war_name": "Western Sahara War"},
 	{"end_year": "1978", "start_year": "1978", "war_name": "Shaba II"},
 	{"end_year": "1987", "start_year": "1978", "war_name": "Chadian Libyan Conflict"},
@@ -21,16 +20,5 @@ var France_War= [
 	{"end_year": "1994", "start_year": "1991", "war_name": "Djiboutian Civil War"},
 	{"end_year": "2000", "start_year": "1991", "war_name": "Somali Civil War"},
 	{"end_year": "1999", "start_year": "1999", "war_name": "Kosovo War"},
-	{"end_year": "1995", "start_year": "1993", "war_name": "NATO Intervention"},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "1995", "start_year": "1993", "war_name": "NATO Intervention"}
 ]

@@ -39,6 +39,5 @@ var Russia_War= [
 	{"end_year": "1993", "start_year": "1991", "war_name": "Georgian Civil War"},
 	{"end_year": "1996", "start_year": "1994", "war_name": "First Chechen War"},
 	{"end_year": "1999", "start_year": "1999", "war_name": "War of Dagestan "},
-	{"end_year": "2009", "start_year": "1999", "war_name": "Second Chechen War"},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "2009", "start_year": "1999", "war_name": "Second Chechen War"}
 ]

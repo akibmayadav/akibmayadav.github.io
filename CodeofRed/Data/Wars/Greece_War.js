@@ -16,21 +16,5 @@ var Greece_War= [
 	{"end_year": "2003", "start_year": "1991", "war_name": "UN Iraq Kuwait Observation Mission"},
 	{"end_year": "2004", "start_year": "1992", "war_name": "NATO Intervention"},
 	{"end_year": "1995", "start_year": "1995", "war_name": "Imia/Kardak Crisis"},
-	{"end_year": "1997", "start_year": "1997", "war_name": "Rebellion in Albania"},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "1997", "start_year": "1997", "war_name": "Rebellion in Albania"}
 ]

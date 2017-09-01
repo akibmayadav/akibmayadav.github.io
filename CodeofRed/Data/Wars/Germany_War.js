@@ -19,18 +19,5 @@ var Germany_War= [
 	{"end_year": "2002", "start_year": "1991", "war_name": "Sierra Leone Civil War"},
 	{"end_year": "1995", "start_year": "1992", "war_name": "Bosnian War"},
 	{"end_year": "1997", "start_year": "1997", "war_name": "Operation Libelle"},
-	{"end_year": "1999", "start_year": "1998", "war_name": "Kosovo War"},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "1999", "start_year": "1998", "war_name": "Kosovo War"}
 ]

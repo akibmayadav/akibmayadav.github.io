@@ -1,5 +1,5 @@
 var Italy_War= [
-	{"end_year": "1901", "start_year": "1899", "war_name": "Boxer Rebellion"},
+	{"end_year": "1901", "start_year": "1900", "war_name": "Boxer Rebellion"},
 	{"end_year": "1912", "start_year": "1911", "war_name": "Italo Turkish War"},
 	{"end_year": "1918", "start_year": "1914", "war_name": "World War I"},
 	{"end_year": "1920", "start_year": "1918", "war_name": "Allied Intervention in Russian Civil War"},
@@ -16,21 +16,5 @@ var Italy_War= [
 	{"end_year": "1996", "start_year": "1992", "war_name": "Bosnian War"},
 	{"end_year": "1995", "start_year": "1992", "war_name": "Somali Civil War"},
 	{"end_year": "1997", "start_year": "1997", "war_name": "Operation Alba"},
-	{"end_year": "1999", "start_year": "1999", "war_name": "Kosovo War"},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""},
-	{"end_year": "", "start_year": "", "war_name": ""}
+	{"end_year": "1999", "start_year": "1999", "war_name": "Kosovo War"}
 ]
