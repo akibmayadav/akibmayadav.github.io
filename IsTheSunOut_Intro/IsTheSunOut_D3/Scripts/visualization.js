@@ -37,8 +37,8 @@ for (var y=0; y<years.length ;y++)
 	var parameter_year_data = [];
 	for (var a=0; a<12; a++)
 	{
-		var parameter_data = checkouts_domain(formatted_years[y],a);
-		parameter_year_data.push(parameter_data);
+		var c_domain = d3.extent(formatted_years[y],function(d){return d.Checkouts[a]});
+		parameter_year_data.push(c_domain);
 	}
 	formatted_years_parameters.push(parameter_year_data);
 }
@@ -177,19 +177,23 @@ mainVisualizationCanvas.append("g")
 
 var total_arcs = data_year.length;
 
-var start_date = new Date(data_year[0].Date);
-var end_date = new Date(data_year[total_arcs-1].Date);
+var p_domain = d3.extent(data_year,function(d){return(d.prep)});
+var t_domain = d3.extent(data_year,function(d){return(d.temp)});
+var d_domain = d3.extent(data_year,function(d){return(new Date(d.Date))});
+
+var start_date = d_domain[0];
+var end_date = d_domain[1];
 
 var prep_scale = d3.scaleLinear()
-					.domain(prep_domain(data_year,total_arcs))
+					.domain(p_domain)
 					.range([0,1]);
 
 var temp_scale = d3.scaleLinear()
-					.domain(temp_domain(data_year,total_arcs))
+					.domain(t_domain)
 					.range([0,1]);
 
 var date_scale = d3.scaleLinear()
-					.domain([start_date,end_date])
+					.domain(d_domain)
 					.range([0,2*Math.PI])
 
 // Precipitation
@@ -304,19 +308,25 @@ function dewey_checkout(dewey,color)
 {
 
 	var checkouts_inner_r = 0.58*prep_outer_r;
-	var checkouts_outer_r = 0.97*prep_outer_r;
+	var checkouts_outer_r = 0.98*prep_outer_r;
 
+	var c_domain = d3.extent(data_year,function(d){return d.Checkouts[dewey]});
 	var checkout_scale = d3.scaleLinear()
-					.domain(checkouts_domain(data_year,dewey))
+					.domain(c_domain)
 					.range([checkouts_inner_r,checkouts_outer_r]);
+
+	var min_rad = checkout_scale(c_domain[0]);
+	var max_rad = checkout_scale(c_domain[1]);
 
 	var lineData =[];
 
 	for (var a = 0 ; a <total_arcs ;a++)
 	{
-		var angle = date_scale(new Date(data_year[a].Date));
+		var date = new Date(data_year[a].Date);
+		var angle = date_scale(date);
 		var radius  = checkout_scale(data_year[a].Checkouts[dewey]);
 		var final = {"angle":angle,"radius":radius};
+		var day = date.getDay();
 		lineData.push(final);
 	}
 
@@ -332,8 +342,25 @@ function dewey_checkout(dewey,color)
 						.attr("d",lineFunction(lineData))
 						.attr("stroke","#fc884e")
 						.attr("stroke-width",0.3)
-						.attr("opacity",0.5)
+						.attr("opacity",0.8)
 						.attr("fill","#404040")
+
+	var checkout_boundary = mainVisualizationCanvas.append("g")
+						.attr("id","checkout_boundary");
+
+	checkout_boundary.append("circle")
+						.attr("r",min_rad)
+						.attr("stroke","#fc884e")
+						.attr("stroke-width",3.0)
+						.attr("opacity",0.3)
+						.attr("fill","none")
+
+	checkout_boundary.append("circle")
+						.attr("r",max_rad)
+						.attr("stroke","#fc884e")
+						.attr("stroke-width",3.0)
+						.attr("opacity",0.3)
+						.attr("fill","none")
 
 	// inner temperature ( orange ) circle
 	var inner_circle = mainVisualizationCanvas.append("g")
@@ -381,69 +408,11 @@ function dewey_checkout(dewey,color)
 						.attr("x1",-prep_inner_r*0.5)
 						.attr("y1",5)
 						.attr("x2",+prep_inner_r*0.5)
-						.attr("y2",5)
-						
+						.attr("y2",5)						
 }
 
 }
 
-function prep_domain(data,total){
-var max_prep = 0;
-for ( var a= 0 ; a<total ;a++){
-	if(max_prep<data[a].prep){
-		max_prep = data[a].prep;
-	}
-}
-
-var min_prep = max_prep;
-for ( var a= 0 ; a<total ;a++){
-	if(min_prep>data[a].prep){
-		min_prep = data[a].prep;
-	}
-}
-return [min_prep,max_prep]
-}
-
-function temp_domain(data,total){
-var max_temp = 0;
-for ( var a= 0 ; a<total ;a++){
-	if(max_temp<data[a].temp){
-		max_temp = data[a].temp;
-	}
-}
-
-var min_temp = max_temp;
-for ( var a= 0 ; a<total ;a++){
-	if(min_temp>data[a].temp){
-		if( data[a].temp!=0)
-		{
-			min_temp = data[a].temp;
-		}	
-	}
-}
-return ([min_temp,max_temp])
-}
-
-function checkouts_domain(data_checkouts,dewey){
-
-var max = 0;
-
-for ( var a= 0 ; a<data_checkouts.length ;a++)
-{
-		if(max<data_checkouts[a].Checkouts[dewey])
-		{max = data_checkouts[a].Checkouts[dewey];}
-	
-}
-
-var min = max;
-for ( var a= 0 ; a<data_checkouts.length ;a++)
-{
-		if(min>data_checkouts[a].Checkouts[dewey])
-		{ min = data_checkouts[a].Checkouts[dewey];}	
-}
-
-return ([min,max])
-}
 
 function format_data(raw_data)
 {
