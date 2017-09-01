@@ -63,25 +63,10 @@ for (var y=0; y<years.length ;y++)
 }
 
 // Finding max and min avg prep and temp to give background colors
-var max_avg_prep = 0; 
-var max_avg_temp = 0;
-for ( var a = 0 ; a<years_parameters_temp_prep.length ;a++)
-{
-	if(max_avg_temp < years_parameters_temp_prep[a].temp)
-		max_avg_temp = years_parameters_temp_prep[a].temp;
-	if(max_avg_prep < years_parameters_temp_prep[a].prep)
-		max_avg_prep = years_parameters_temp_prep[a].prep;
-}
-var min_avg_prep = max_avg_prep;
-var min_avg_temp = max_avg_temp;
-
-for ( var a = 0 ; a<years_parameters_temp_prep.length ;a++)
-{
-	if(min_avg_temp > years_parameters_temp_prep[a].temp)
-		min_avg_temp = years_parameters_temp_prep[a].temp;
-	if(min_avg_prep > years_parameters_temp_prep[a].prep)
-		min_avg_prep = years_parameters_temp_prep[a].prep;
-}
+var max_avg_temp= d3.max(years_parameters_temp_prep,function(d){return d.temp});
+var min_avg_temp= d3.min(years_parameters_temp_prep,function(d){return d.temp});
+var max_avg_prep= d3.max(years_parameters_temp_prep,function(d){return d.prep});
+var min_avg_prep= d3.min(years_parameters_temp_prep,function(d){return d.prep});
 
 var avg_temp_scale = d3.scaleLinear()
 						.domain([min_avg_temp,max_avg_temp])
