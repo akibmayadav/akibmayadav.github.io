@@ -1,0 +1,94 @@
+@font-face {
+        font-family: "Rudiment";
+        src: url("../Data/Rudiment.ttf");
+}
+
+#background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    filter:alpha(opacity=80);
+}
+
+#mainVisualization
+{
+    position:absolute;
+    /*background: rgba(0,0,0,0.05);*/
+    font-family: sans-serif;
+    height:100%;
+    width:50%;
+}
+
+#year_te
+{
+  position:absolute;
+  right:100px;
+  display:block;
+  font-family: arial;
+  font-size:200%;
+  font-weight: lighter;
+  fill:black;
+
+}
+
+#dewey_te
+{
+  position:absolute;
+  right:100px;
+  display:block;
+  font-family: arial;
+  font-size:100%;
+  font-weight: lighter;
+  fill:black;
+}
+
+#date_tool
+{
+  position:absolute;
+  right:100px;
+  display:block;
+  font-family: arial;
+  font-size:80%;
+  font-weight: lighter;
+  fill:white;
+}
+
+#temp_prep_tool
+{
+  position:absolute;
+  right:100px;
+  display:block;
+  font-family: arial;
+  font-size:50%;
+  font-weight: lighter;
+  fill:white;
+}
+
+#label
+{
+  position:absolute;
+  right:100px;
+  display:block;
+  font-family: arial;
+  font-size:8;
+  font-weight: lighter;
+}
+
+#cross
+{
+    position:absolute;
+    font-family: sans-serif;
+    font-size: 40px;
+    height : 40px;
+    right : 40px;
+    top : 40px;
+    transform: translateX(-50%) translateY(-50%);
+    opacity:0.1;
+}
+
+#cross:hover{
+    opacity:0.7;
+}
