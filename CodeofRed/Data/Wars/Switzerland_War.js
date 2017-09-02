@@ -1,2 +1,0 @@
-var Switzerland_War= [
-]
