@@ -1,0 +1,118 @@
+#slide10introductionText
+{
+    top:50%;
+    left:50%;
+    font-family: sans-serif;
+    font-size: 2vw;
+    color: #404040;
+    transform: translateX(-50%)translateY(-50%);
+    text-align: center;
+}
+.tooltip_line{
+    position:absolute;
+    background-color: hsla(0,0%,100%,.9);
+    padding: 0px;
+}
+
+.tooltip {
+    position:absolute;
+    font-family: sans-serif;
+  background-color: hsla(0,0%,100%,.9);
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1em;
+    width: 190px;
+}
+.tooltip .year {
+  font-weight: 900;
+  font-size: 1.25em;
+  margin-bottom: 2px;
+}
+.tooltip .swatch {
+  width: 11px;
+  height: 11px;
+  float: left;
+  margin-top: 3px;
+  margin-right: 4px;
+}
+
+.tooltip .category {
+  text-transform: uppercase;
+}
+.tooltip .value {
+  margin-top: 3px;
+  margin-right: 4px;
+}
+
+#Streamgraph_text
+{
+    top:60px;
+    left:0px;
+    right:0px;
+    font-family: sans-serif;
+    font-size: 2vw;
+    color: #404040;
+    margin: 0px 100px 0px 100px;
+    text-align: justify;
+}
+
+
+#Domain_Selector
+{
+    padding:0px;
+    margin :0px;
+}
+.domain
+{
+    top:0px;
+    padding:3px;
+    position:absolute;
+    text-align : center;
+    font-family: sans-serif;
+    font-size: 1.0vw;
+    color: #ffffff;
+    border:2px solid #f9f6ea;
+    text-transform: uppercase;
+}
+
+.domain:hover
+{
+    background-color: #e0dd2a
+}
+
+#radials_label
+{
+    position:absolute;
+    font-family: sans-serif;
+    font-size: 1.3vw;
+    text-anchor: middle;
+    color: #404040;
+}
+
+#left_arrow
+{
+    position:absolute;
+    height : 10%;
+    left : 0.1vw;
+    bottom : 50%;
+    transform: rotateZ(90deg);
+    opacity:0.1;
+}
+
+#left_arrow:hover{
+    opacity:0.7;
+}
+
+#right_arrow
+{
+    position:absolute;
+    height : 10%;
+    right : 0.1vw;
+    bottom : 50%;
+    transform: rotateZ(-90deg);
+    opacity:0.1;
+}
+
+#right_arrow:hover{
+    opacity:0.7;
+}

@@ -1,0 +1,116 @@
+body
+{
+	margin:0;
+}
+
+input[type=text] {
+    padding: 0.1vw 0.1vw;
+    box-sizing: border-box;
+    font-family :sans-serif;
+    font-size :1.2vw;
+}
+
+#tooltip
+{
+	position:absolute;
+    font-family: sans-serif;
+ 	background-color: white;
+  	padding: 10px;
+  	border-radius: 2px;
+  	font-size: 1em;
+}
+
+#centerintroductionText
+{
+	top:50%;
+	left:50%;
+	font-family: sans-serif;
+	font-size: 2vw;
+	text-align: justify;
+	color: #404040;
+	transform: translateX(-50%)translateY(-50%);
+	text-align: center;
+}
+
+#slide1introductionText
+{
+	top:50%;
+	left:50%;
+	font-family: sans-serif;
+	font-size: 10vw;
+	text-align: justify;
+	color: #404040;
+	transform: translateX(-50%)translateY(-50%);
+	text-align: center;
+}
+
+#introductionText, #selectionText, #sortButton, #constLabel
+{
+	font-family: sans-serif;
+	font-size: 2vw;
+	text-align: justify;
+	color: #404040;
+}
+
+#constLabel
+{
+	position:absolute;
+	font-size: 15px;
+	left:50%;
+	transform: translateX(-50%);
+}
+
+.Mean_Label
+{
+	position:absolute;
+	font-family: sans-serif;
+	font-size: 10px;
+	left:50%;
+	transform: translateX(-50%);
+}
+
+#center_align,#constituency_search
+{
+	position:absolute;
+	text-align: center;
+	left:50%;
+	font-size: 1.3vw;
+	transform: translateX(-50%);
+}
+
+#Year_Label
+{
+	position:absolute;
+	font-family: sans-serif;
+	font-size: 19px;
+	text-align: justify;
+	color: #404040;
+}
+
+#left_arrow
+{
+    position:absolute;
+    height : 10%;
+    left : 0.1vw;
+    bottom : 50%;
+    transform: rotateZ(90deg);
+    opacity:0.1;
+}
+
+#left_arrow:hover{
+    opacity:0.7;
+}
+
+#right_arrow
+{
+    position:absolute;
+    height : 10%;
+    right : 0.1vw;
+    bottom : 50%;
+    transform: rotateZ(-90deg);
+    opacity:0.1;
+}
+
+#right_arrow:hover{
+    opacity:0.7;
+}

@@ -1,0 +1,1067 @@
+<html>
+<head>
+<title> SECTION 3: CURRENT CANDIDATE DATA VISUALIZATION</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="Assets/EasyAutocomplete/jquery.easy-autocomplete.js"></script>
+<link rel="stylesheet" type="text/css" href="Style/section3_main.css">
+<link rel="stylesheet" type="text/css" href="Assets/EasyAutocomplete/easy-autocomplete.themes.css">
+<body>
+<div id="mainVisualization" style= "position:absolute"></div>
+<div id="Interaction_1" style= "position:absolute"></div>
+<div id="Interaction_2" style= "position:absolute"></div>
+<div id ="logo"> MATDAN </div>
+<div id ="close" onClick = "document.location.href='../start.html';"> x </div>
+<script>
+
+// Background Color
+
+$('body').css("background-color","#152847");
+$('body').css("margin","0");
+
+// SVG for the visualization 
+var height = window.innerHeight;
+var width = window.innerHeight;
+$('body').css("width",1.9*width);
+
+
+var left_over_space = window.innerWidth - 1.9*width;
+var shift = (left_over_space>0)?left_over_space/2:0;
+$("#logo").css("left",0.9*width + shift);
+
+var mainVisualizationCanvas = d3.select("#mainVisualization")
+     .style("left",(shift+width*0.4)+"px")
+	   .append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 1000 1000")
+     .attr("width",width)
+     .attr("height",height)
+     .attr("class", "mainsvg")
+     .append("g")
+     .style("transform","translate(500px,500px)");
+
+var margin = {"top":40,"bottom":40,"left":40,"right":40}
+
+var interactionCanvas_1 = d3.select("#Interaction_1")
+     .style("left",shift+"px")
+     .append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 400 1000")
+     .attr("width",width*0.4)
+     .attr("height",height)
+     .attr("class", "mainsvg")
+     .style("background-color","rgb(20, 33, 66)")
+
+var interactionCanvas_2 = d3.select("#Interaction_2")
+     .style("left",(shift+1.4*width)+"px")
+     .append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 500 1000")
+     .attr("width",width*0.5)
+     .attr("height",height)
+     .attr("class", "mainsvg")
+     .style("background-color","rgb(20, 33, 66)")
+
+var viz_height = 1000 - margin.top - margin.bottom;
+var viz_width = 1000 - margin.left -margin.right;
+
+// General Variables
+var main_parties = ["INC","BJP","IND","BSP","Others"]
+var main_parties_full = ["Indian National Congress","Bhartiya Janta Party","Independent","Bahujan Samaj Party", " "]
+var party_colors = ['#3a9ab2','#fc8d62','#e0e03e','#e78ac3',"#d86868"];
+var main_parties_button = [1,1,1,1,1];
+
+var education = ["Doctorate","Post Graduate","Graduate Professional", "Graduate" , "12th Pass", "10th Pass", "8th Pass", "5th Pass", "Illiterate", "Others", "Not Given"];
+var education_colors = ["#00441b", "#006d2c", "#238b45", "#41ab5d", "#74c476", "#a1d99b", "#c7e9c0", "#e5f5e0", "#f7fcf5","#c7e9c0", "#41ab5d"];
+var education_button = [1,1,1,1,1,1,1,1,1,1,1];
+
+var criminal_cases = ["0", "1", "2", "3", "6", "7"];
+var criminal_colors = ["#fee0d2", "#fcbba1", "#fc9272", "#fb6a4a", "#ef3b2c", "#cb181d"];
+
+var criminal_button = [1,1,1,1,1,1];
+
+// Helper Functions
+var stratify = d3.stratify()
+  .id(function(d) { return d.id })
+  .parentId(function(d) { return (d.id.substring(0, d.id.lastIndexOf("-"))); });
+
+d3.csv("Data/sample_affidavit_data.csv",function(error,data)
+ {
+	if(error) throw error;
+
+  // console.log(data);
+  // Minimising Party Names. 
+  data.forEach(d=> {
+    var i_mp = main_parties.findIndex(e=>e==d.Party);
+    var party_name = (i_mp>=0)? main_parties[i_mp]:main_parties[4];
+    d.Candidate = d.Candidate.split(".").join("");
+    d.party_name = party_name;
+    d.Criminal_Cases = parseInt(d.Criminal_Cases);
+    d.Liablities_i = d.Liablities;
+    d.Assets_i = d.Total_Assets;
+    d.Liablities = parseInt(d.Liablities.split(",").join(""));
+    d.Total_Assets = parseInt(d.Total_Assets.split(",").join(""));
+  })
+
+  /***** PRIORITY DATA BEING LOADED *******/
+  // Getting data in shape for stratification. Unique Id for each dataframe required. 
+  var priority = ['party_name','Education','Criminal_Cases'];
+  var priority_data = [];
+  var main_parent = "Gujarat";
+
+  // Candidate level data being pushed into PRIORITY DATA
+  data.forEach(function(d,i){
+    var priority_dataframe = {};
+    priority_dataframe.id = main_parent+"-"+replace_space(d[priority[0]])+"-"+replace_space(d[priority[1]])+"-"+d[priority[2]]+"-"+replace_space(d.Candidate);
+    priority_dataframe.attributes = d;
+    priority_dataframe.value = 1;
+    priority_data.push(priority_dataframe);
+  })
+
+  // Nesting according to priority. 
+  var nesting = d3.nest();
+  priority.forEach(function(d){
+      nesting.key(function(e){return e[d]});
+  })
+  var nested_priority_data = nesting.entries(data);
+
+  // Creating higher level data points for stratification. Need to automate this according to priority. 
+  nested_priority_data.forEach(function(d,i){
+    d.id = main_parent+"-"+replace_space(d.key);
+    priority_data.push({id : d.id}); 
+    d.values.forEach(function(e,i){
+      e.id = d.id+"-"+replace_space(e.key);
+      priority_data.push({id : e.id}); 
+      e.values.forEach(function(f,i){
+        f.id = e.id+"-"+f.key;
+        priority_data.push({id : f.id})
+      })
+    })
+  });
+
+  // Main parent dataframe.
+  priority_data.push({id : "Gujarat"});
+  
+  // Stratifying
+  var root = stratify(priority_data)
+      .sum(function(d) { return d.value; })
+      // .sort(function(a, b) { return b.value - a.value; });
+
+  console.log(root);
+  // Position on nodes in a radial tree. 
+  var cluster = d3.cluster()
+    .size([360, viz_width/2 -60 ]);
+  cluster(root);
+
+  /****************** LIABILITY AND ASSETS FLOW ****************/
+
+  var new_extent = [0,907329000];
+  var liablities_extent = d3.extent(data,function(d,i){
+    return d.Liablities
+  })
+  var liablities_scale = d3.scalePow()
+                          .domain(new_extent)
+                          .range([0,60]);
+
+  var assets_extent = d3.extent(data,function(d,i){
+    return d.Total_Assets
+  })
+  var assets_scale = d3.scalePow()
+                          .domain(new_extent)
+                          .range([10,60]);
+
+  var outer_data = root.leaves();
+  outer_data.sort(function(x,y){
+    return d3.ascending(x.x,y.x);
+  })
+
+  var d_e = 10;
+
+  var liability_data = [];
+  outer_data.forEach(d=> {
+    var final = {};
+    final.angle = Math.PI/180*d.x;
+    final.innerradius = d.y +d_e ; 
+    final.outerradius = d.y + liablities_scale(d.data.attributes.Liablities) +d_e ;
+    liability_data.push(final);
+  })
+
+  liability_data.push(liability_data[0]);
+
+  var asset_data = [];
+  outer_data.forEach(d=> {
+    var final = {};
+    final.angle = Math.PI/180*d.x;
+    final.outerradius = d.y + assets_scale(d.data.attributes.Total_Assets)+d_e;
+    asset_data.push(final);
+  })
+
+  asset_data.push(asset_data[0]);
+
+  var arc = d3.lineRadial()
+      .curve(d3.curveCardinal)
+      .angle(function(d) { return d.angle; })
+      .radius(function(d) { return d.outerradius; })
+
+  var assets_points = mainVisualizationCanvas.append("g")
+                                  .attr("id","assets_points")
+                                  .append("path")
+                                  .attr("d",arc(asset_data))
+                                  .attr("fill","none")
+                                  .attr("stroke","white")
+                                  .attr("stroke-width",2.0)
+                                  .attr("opacity",0.8);
+
+  var liablity_points = mainVisualizationCanvas.append("g")
+                                  .attr("id","liablity_points")
+                                  .append("path")
+                                  .attr("d",arc(liability_data))
+                                  .attr("fill","none")
+                                  .attr("stroke","#dd2727")
+                                  .attr("stroke-width",2.0)
+                                  .attr("opacity",0.8);
+
+  // Inner tree data Visualization
+  var link = mainVisualizationCanvas.append("g")
+      .attr("id","connections")
+      .selectAll(".link")
+      .data(root.descendants().splice(6))
+      .enter().append("path")
+      .attr("class",function(d,i){
+        var party_nam = d.id.split("-")[1];
+        return(party_nam);
+      })
+      .attr("id",function(d,i){return d.id})
+      .attr("d", function(d) {
+        var par_y = d.parent.y;
+        var par_x = d.parent.x;
+
+        if(d.depth == 2)
+        {
+          par_y -=50;
+        }
+        return "M" + project(d.x, d.y)
+            + "C" + project(d.x, (d.y + par_y) / 2)
+            + " " + project(par_x, (d.y + par_y) / 2)
+            + " " + project(par_x,par_y);
+      })
+      .attr("stroke",function(d,i){ 
+          var party = d.id.split("-")[1];
+          var color = party_colors[main_parties.findIndex(data=>data==party)];
+          return color;
+      })
+      .attr("stroke-width",2.0)
+      .attr("fill","none")
+
+  var node = mainVisualizationCanvas.append("g").attr("id","category").selectAll(".node")
+      .data(root.descendants().splice(1))
+      .enter().append("g").attr("id",function(d,i){
+        return d.id+"_category_arcs"
+      })
+      .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf"); })
+      .attr("transform", function(d) { 
+        var par_y = d.y;
+        if(d.depth == 1)
+        {
+          par_y -=50;
+        }
+        return "translate(" + project(d.x, par_y) + ")"; });
+
+  var tooltip = d3.select("body")
+          .append("div")
+          .attr("class","tooltip")
+          .style("visibility","hidden");
+
+  node.append("circle")
+      .attr("r", function(d,i){
+        var priority = d.depth-1 ;
+        if (priority == 3) { return 2.0}
+        else if (priority ==0) {return 10.0}
+        else if (priority ==1) {return 4.0}
+        else {return 4.0}
+      })
+      .attr("fill",function(d,i){
+        var priority = d.depth-1 ;
+        if (priority == 3) { return "white"}
+        else {
+          var id = d.id.split("-")[priority+1];
+          switch(priority){
+            case 0 : {
+              var index = main_parties.findIndex(data=>data==id);
+              return party_colors[index];
+            } break;
+            case 1 : {
+              var ed = id.split("_").join(" ");
+              var index = education.findIndex(data=>data==ed);
+              return education_colors[index];
+            } break;
+            case 2 :{
+              var cr = id; 
+              var index = criminal_cases.findIndex(data=>parseInt(data)==cr);
+              return criminal_colors[index];
+            } break;
+          }
+          return "black"
+        }
+      })
+      .attr("opacity",function(d,i){
+         var priority = d.depth-1 ;
+          switch(priority){
+            case 0,1,2 : {
+              return 1.0;
+            } break;
+            case 3 :{
+              return 0.5;
+            } break;
+          }
+      })
+      .attr("stroke","white")
+      .attr("stroke-width",0.5)
+      .on("mouseover",function(d,i){
+        var text_main = d.id.split("-");
+        var priority = d.depth-1 ;
+        var text = "";
+
+        var party_name = text_main[1];
+
+        if (priority != 3)
+        {
+          var id = d.id.split("-")[priority+1]; 
+          switch(priority)
+          {
+            case 0 : {
+              text += "<b>"+d.leaves().length +" Candidates</b>"  +"<br> Party : " + party_name ;
+            } break;
+            case 1 : {
+              text += "<b>"+d.leaves().length +" Candidates </b>"  +"<br> Party : " + party_name +"<br> Education : " + text_main[2].split("_").join(" ");
+            } break;
+            case 2 :{
+              text += "<b>"+d.leaves().length +" Candidates </b>"  +"<br> Party : " + party_name +"<br> Education : " + text_main[2].split("_").join(" ") + "<br> Crimes : " + text_main[3];
+            } break;
+          }
+        }
+        else 
+        {
+          text += "<b>"+d.data.attributes.Candidate+"</b>"  +"<br> Party : " + d.data.attributes.Party +"<br> Education : " + text_main[2].split("_").join(" ") + "<br> Crimes : " + text_main[3] + "<br> Liabilities : Rs." + d.data.attributes.Liablities_i + "<br> Assets : Rs." + d.data.attributes.Assets_i;
+        }
+
+        var scrollLeft = $(window).scrollLeft() ;
+
+        var left = event.clientX + scrollLeft;
+        var temp_top = event.clientY;
+
+        var top = (temp_top>window.innerHeight-150)?(top= temp_top-120):top=temp_top+10;
+
+        var test = main_parties.findIndex(data=>data==party_name);
+
+        tooltip.style("top",top+"px")
+               .style("left",left+"px")
+               .style("visibility","visible")
+               .style("background-color",party_colors[main_parties.findIndex(data=>data==party_name)])
+               .style("color","white")
+               .style("opacity",0.9)
+               .html(text)
+
+      })
+      .on("mouseout",function(d,i){
+
+        tooltip.style("visibility","hidden");
+
+      })
+
+
+  // Liability and Assets Reader 
+
+  var sample_liability_data = [];
+  for ( var a = 0 ; a <30 ; a++)
+  {
+    var final = {};
+    final.angle = Math.PI/180*a;
+    final.outerradius = 400+ Math.random()*5;
+    sample_liability_data.push(final);
+  }
+
+  var liability_reader = mainVisualizationCanvas.append("g")
+                        .attr("id","Liability_Reader")
+                        .attr("transform","translate(+360,840) rotate(-13)");
+  
+  liability_reader.append("path")
+                  .attr("d", arc(sample_liability_data))
+                  .attr("stroke","#dd2727")
+                  .attr("stroke-width",2)
+                  .attr("opacity",0.8)
+                  .attr("fill","none")
+
+  liability_reader.append("text")
+                  .attr("transform","translate(35,-370) rotate(+13)")
+                  .text("Liabilities (Rs)")
+                  .attr("class","index")
+                  .attr("opacity",0.8)
+                  .attr("fill","#dd2727")
+
+
+  
+  var sample_assets_data = [];
+  for ( var a = 0 ; a <30 ; a++)
+  {
+    var final = {};
+    final.angle = Math.PI/180*a;
+    final.outerradius = 400+ Math.random()*15;
+    sample_assets_data.push(final);
+  }
+
+  var assets_reader = mainVisualizationCanvas.append("g")
+                        .attr("id","Assets_Reader")
+                        .attr("transform","translate(+360,825) rotate(-13)");
+  
+  assets_reader.append("path")
+                  .attr("d", arc(sample_assets_data))
+                  .attr("stroke","white")
+                  .attr("stroke-width",2)
+                  .attr("opacity",0.8)
+                  .attr("fill","none")
+
+  assets_reader.append("text")
+                  .attr("transform","translate(55,-420) rotate(+13)")
+                  .text("Assets (Rs)")
+                  .attr("class","index")
+                  .attr("fill","white")
+                  .attr("opacity",0.8)
+  
+  // node.append("text")
+  //     .attr("dy", "0.31em")
+  //     .attr("x", function(d) { return d.x < 180 === !d.children ? 6 : -6; })
+  //     .style("text-anchor", function(d) { return d.x < 180 === !d.children ? "start" : "end"; })
+  //     .attr("transform", function(d) { return "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")"; })
+  //     .text(function(d) { return d.id.substring(d.id.lastIndexOf(".") + 1); });
+
+ /********** Interaction Canvas ************/
+ var size = 1000; 
+ var margin_top = 60; 
+ var margin_left = 40;
+
+ /*********** Political Parties ***********/
+ var political_parties = interactionCanvas_1.append("g")
+                  .attr("id","political_parties");
+                  
+ political_parties.append("text")
+                  .attr("class","heading")
+                  .text("POLITICAL PARTIES")
+                  .attr("x",margin_left)
+                  .attr("y",margin_top)
+                  .attr("opacity",1.0);
+
+var party_gap = 40; 
+var top = 100;
+var party_option = political_parties.append("g")
+                  .attr("id","party_options")
+                  .selectAll("g")
+                  .data(main_parties)
+                  .enter()
+                  .append("g")
+                  .attr("id",function(d,i){
+                    return i+"_party_option";
+                  })
+                  .attr("transform",function(d,i){
+                    return "translate(55,"+(top+(i*party_gap))+")";
+                  });
+
+selection();
+function selection()
+{
+    var connect = root.descendants().slice(6);
+    var length = connect.length;
+    for ( var a = 0 ; a<length ; a++)
+    {
+      var id = connect[a].id;
+      var depth = connect[a].depth; 
+      if ( depth == 2)
+      {
+        var party = id.split("-")[1];
+        var educ = id.split("-")[2];
+
+        var index_party = main_parties.findIndex(d=>d==party);
+        var index_education = education.findIndex(d=>{
+          var rep = d.split(" ").join("_");
+          return (rep==educ);
+        });
+        
+        var final_id = "#"+id;
+        if(main_parties_button[index_party]==1&&education_button[index_education]==1)
+        {
+          $(final_id).attr("opacity",1.0)
+        }
+        else 
+        {
+          $(final_id).attr("opacity",0.3)
+        }
+      }
+
+      if(depth == 3)
+      {
+        var party = id.split("-")[1];
+        var educ = id.split("-")[2];
+        var crime = id.split("-")[3];
+
+        var index_party = main_parties.findIndex(d=>d==party);
+        var index_education = education.findIndex(d=>{
+          var rep = d.split(" ").join("_");
+          return (rep==educ);
+        });
+        var index_crime = criminal_cases.findIndex(d=>{
+          var rep = parseInt(d);
+          return (rep==crime);
+        });
+        
+        var final_id = "#"+id;
+        if(main_parties_button[index_party]==1&&education_button[index_education]==1&&criminal_button[index_crime]==1)
+        {
+          $(final_id).attr("opacity",1.0)
+        }
+        else 
+        {
+          $(final_id).attr("opacity",0.3)
+        }
+
+      }
+
+      if(depth == 4)
+      {
+        var party = id.split("-")[1];
+        var educ = id.split("-")[2];
+        var crime = id.split("-")[3];
+
+        var index_party = main_parties.findIndex(d=>d==party);
+        var index_education = education.findIndex(d=>{
+          var rep = d.split(" ").join("_");
+          return (rep==educ);
+        });
+        var index_crime = criminal_cases.findIndex(d=>{
+          var rep = parseInt(d);
+          return (rep==crime);
+        });
+        
+        var final_id = "#"+id;
+        if(main_parties_button[index_party]==1&&education_button[index_education]==1&&criminal_button[index_crime]==1)
+        {
+          $(final_id).attr("opacity",1.0)
+        }
+        else 
+        {
+          $(final_id).attr("opacity",0.3)
+        }
+
+      }
+
+    }
+
+};
+
+party_option.append("circle")
+            .attr("r",10)
+            .attr("cx",0)
+            .attr("cy",0)
+            .attr("fill",function(d,i){
+              return party_colors[i];
+            })
+            .on("click",function(d,i){
+              var on = main_parties_button[i];
+              if (on == 0)
+              {
+                d3.select(this).attr("stroke-width",3.0)
+                main_parties_button[i] = 1;
+                selection();
+
+              }
+              else 
+              {
+                d3.select(this).attr("stroke-width",0.0)
+                main_parties_button[i] = 0;
+                selection();
+              }
+              
+            })
+            .attr("stroke","white").attr("stroke-width",3.0);
+
+var party_count = d3.nest()
+                    .key(function(d){return d.Party})
+                    .entries(data);
+
+party_option.append("text")
+            .attr("class","option_text")
+            .attr("x",20)
+            .attr("y",8)
+            .text(function(d,i){ 
+
+              return main_parties_full[i] + " (" +d+")"
+              })
+ 
+
+/*********** EDUCATION ***********/
+
+var education_option = interactionCanvas_1.append("g")
+                  .attr("id","education");
+                  
+education_option.append("text")
+                  .attr("class","heading")
+                  .text("CANDIDATE EDUCATION")
+                  .attr("x",margin_left)
+                  .attr("y",margin_top + 280)
+                  .attr("opacity",1.0);
+
+var party_gap = 40; 
+var top = 380;
+var candidate_education = education_option.append("g")
+                  .attr("id","education")
+                  .selectAll("g")
+                  .data(education)
+                  .enter()
+                  .append("g")
+                  .attr("id",function(d,i){
+                    return i+"_education_option";
+                  })
+                  .attr("transform",function(d,i){
+                    return "translate(55,"+(top+(i*party_gap))+")";
+                  });
+
+
+candidate_education.append("circle")
+            .attr("r",10)
+            .attr("cx",0)
+            .attr("cy",0)
+            .attr("fill",function(d,i){
+              return education_colors[i];
+            })
+            .on("click",function(d,i){
+              reset_lines();
+              var on = education_button[i];
+              if (on == 0)
+              {
+                d3.select(this).attr("stroke-width",3.0)
+                education_button[i] = 1;
+                selection();
+                
+              }
+              else 
+              {
+                d3.select(this).attr("stroke-width",0.0)
+                education_button[i] = 0;
+                selection();
+              }
+              
+            })
+            .attr("stroke","white").attr("stroke-width",3.0);
+
+candidate_education.append("text")
+            .attr("class","option_text")
+            .attr("x",20)
+            .attr("y",8)
+            .text(function(d,i){ return d})
+ 
+ /*********** CRIMES ***********/
+
+var crime_option = interactionCanvas_1.append("g")
+                  .attr("id","crime");
+                  
+crime_option.append("text")
+                  .attr("class","heading")
+                  .text("CRIMINAL HISTORY")
+                  .attr("x",margin_left)
+                  .attr("y",margin_top + 790)
+                  .attr("opacity",1.0);
+
+var party_gap = 40; 
+var top = 890;
+var candidate_crime = crime_option.append("g")
+                  .attr("id","criminal")
+                  .selectAll("g")
+                  .data(criminal_cases)
+                  .enter()
+                  .append("g")
+                  .attr("id",function(d,i){
+                    return i+"_crime_option";
+                  })
+                  .attr("transform",function(d,i){
+                    var trans = "translate(";
+                    if (i<4)
+                    {
+                      trans += (55+(i%4)*80)+",890)"
+                    }
+                    else 
+                    {
+                      trans += (55+(i%4)*80)+",930)"
+                    }
+                    return trans;
+                  });
+
+
+candidate_crime.append("circle")
+            .attr("r",10)
+            .attr("cx",0)
+            .attr("cy",0)
+            .attr("fill",function(d,i){
+              return criminal_colors[i];
+            })
+            .on("click",function(d,i){
+              var on = criminal_button[i];
+              if (on == 0)
+              {
+                d3.select(this).attr("stroke-width",3.0)
+                criminal_button[i] = 1;
+                selection();
+                
+              }
+              else 
+              {
+                d3.select(this).attr("stroke-width",0.0)
+                criminal_button[i] = 0;
+                selection();
+              }
+              
+            })
+            .attr("stroke","white").attr("stroke-width",3.0);
+
+candidate_crime.append("text")
+            .attr("class","option_text")
+            .attr("x",20)
+            .attr("y",8)
+            .text(function(d,i){ return d})
+
+/*********** CONSTITUENCY SELECTION ******/
+
+var constiuency = interactionCanvas_2.append("g")
+                  .attr("id","constiuency");
+
+var center_position =  250;
+
+// Heading 
+constiuency.append("text")
+                  .attr("class","heading_const")
+                  .text("CHOOSE YOUR CONSTITUENCY")
+                  .attr("x",center_position)
+                  .attr("y",margin_top)
+                  .attr("opacity",1.0);
+
+// Constructing Gujarat Map
+d3.json("Data/gujarat.json",function(error,guj){
+  
+  var projection = d3.geoMercator()
+                    .fitExtent([[0,0],[400,400]],guj);
+
+  var guj_path = d3.geoPath(projection)
+
+  var gujarat_map = constiuency.append("g")
+                  .attr("class","gujarat_map")
+                  .attr("transform","translate(50,80)")
+                  .selectAll("path")
+                  .data(guj.features)
+                  .enter()
+                  .append("path")
+                  .attr("d",guj_path)
+                  .attr("fill","none")
+                  .attr("stroke-width",1.0)
+                  .attr("opacity",0.5)
+                  .attr("stroke","white")
+                  .on("mouseover",function(d,i){
+                    d3.select(this).attr("opacity",1.0)
+                                  .attr("fill","#e0e03e")
+                  })
+                  .on("mouseout",function(d,i){
+                    d3.select(this).attr("opacity",0.5)
+                                  .attr("fill","none")
+                  });
+})
+
+
+// Search Box Working
+var consti_search =  constiuency.append("g")
+                          .attr("id","constiuency_search");
+
+var iter = 0; 
+var input = "";
+
+// Outer box
+var consti_box = consti_search.append("rect")
+            .attr("class","search_box")
+            .attr("x",center_position-125)
+            .attr("y",margin_top+420)
+            .attr("width",250)
+            .attr("height",50)
+            .on("click",function(d,i){
+              input = "";
+              var current= constituency_box(input,iter);
+              consti_text.html(current[1]);
+              reset_lines();
+            });
+
+// Text 
+var consti_text = consti_search.append("text")
+            .attr("class","search_text")
+            .attr("x",center_position)
+            .attr("y",margin_top+450)
+            .html("Enter Your Constituency")
+            .on("click",function(d,i){
+              input = "";
+              var current= constituency_box(input,iter);
+              consti_text.html(current[1]);
+              reset_lines();
+            });
+
+var candi_text = consti_search.append("g")
+                  .attr("id","candidate_text")
+                  .append("text")
+                  .attr("x",center_position - 200)
+                  .attr("y",margin_top + 500);
+
+var constituency_box ; // function to get the constituency name.
+
+d3.json("Data/sample_constituency.json",function(err,possible)
+ {
+
+  input = "";
+
+  // keyboard keydown functions
+  document.addEventListener('keydown',(event) => {
+  var key = event.key;
+
+    if( event.keyCode== 8) //Backspace
+    {
+      if(input.length>0){
+      input = input.slice(0,-1)
+      }
+      var current= constituency_box(input,iter);
+      consti_text.html(current[1]);
+    }
+  
+    else if ( event.keyCode>64 && event.keyCode <91) //Letters
+    {
+      input +=key;
+      var current= constituency_box(input,iter);
+      consti_text.html(current[1]);   
+    }
+
+    else if (event.keyCode == 39) // left arrow
+    {
+      var current= constituency_box(input,iter);
+      consti_text.html(current[0][iter]);
+    }
+
+    else if (event.keyCode == 40) // down arrow
+    {
+      var current = constituency_box(input,iter);
+      iter = (iter+1)%current[0].length;
+      current = constituency_box(input,iter);
+      consti_text.html(current[1]); 
+    }
+
+    else if (event.keyCode == 38) // up arrow
+    {
+      var current = constituency_box(input,iter);
+      iter = (iter!=0)?(iter-1)%current[0].length:current[0].length-1;
+      current = constituency_box(input,iter);
+      consti_text.html(current[1]);
+      
+    }
+
+    else if ( event.keyCode== 13) // Enter 
+    {
+      var current= constituency_box(input,iter);
+      var final_const = current[0][iter];
+      reset_lines();
+      extend_lines(final_const);
+    }
+
+  })
+
+
+  constituency_box = function(input,i)
+  {
+
+  var possible_array = []; // possible constituencies
+  var final_input = "";
+      
+  input = input.toUpperCase();
+      
+  // Go throw all the possibilities (possible) to narrow down a list (possible_array).     
+  possible.forEach(d=>{
+    var compare = d.name.slice(0,input.length).toUpperCase();
+    if(compare==input){
+      possible_array.push(d.name);
+    }
+  })
+
+  // predict if something similar exsists.
+  if(possible_array.length!=0)
+  {
+    var extra = possible_array[i].slice(input.length);
+    final_input = "<tspan>"+input+"</tspan>" +'<tspan opacity=0.4>'+ extra +"</tspan>"  ;
+  }
+  else 
+  {
+  // let go if nothing is similar
+    final_input = input;
+  }
+
+  // if there is no input
+  if(input.length == 0)
+  {
+    final_input= "|";
+    reset_lines();
+  }
+
+  var current = [possible_array,final_input];
+  return current; 
+  }
+
+ })
+
+function extend_lines(current,all)
+{
+  var candidates_selected = [];
+  var ie = 0 ; 
+
+  data.forEach(d=>{
+
+    var id_current = "Gujarat-" + d.party_name + "-" + d.Education.split(" ").join("_") + "-" + d.Criminal_Cases +"-"+ d.Candidate.split(" ").join("_");
+
+    if(d.Constituency == current)
+    {
+      // Connections 
+      var change = d3.select("#"+id_current)
+                      .attr("opacity",1.0)
+                      .attr("d",function(d,i){
+                        var par_y = d.parent.y;
+                        var par_x = d.parent.x;
+                        var new_r = d.y+60
+                return "M" + project(d.x, new_r)
+                + "C" + project(d.x, (d.y+ par_y) / 2)
+                + " " + project(par_x, (d.y + par_y) / 2)
+                + " " + project(par_x,par_y);
+                 })
+
+      var circle_id = d3.select("#"+id_current+"_category_arcs");
+      circle_id.attr("transform", function(d) { 
+                        var par_y = d.y+70;
+                        return "translate(" + project(d.x, par_y) + ")"; })
+                  .attr("opacity",1.0)
+                  .select("circle")
+                  .attr("r",10)
+                  .attr("opacity",1.0);
+
+      ie += 1;
+      circle_id.append("text")
+                .attr("class","cand_index")
+                .style("fill",function(d,i){
+                  var i = main_parties.findIndex(e=>e==d.data.attributes.party_name);
+                  return party_colors[i];
+                })
+                .attr("x",-5)
+                .attr("y",+5)
+                .text(ie)
+
+      candidates_selected.push(d);
+    }
+    else 
+    {
+      // Decreasing opacity of others
+      var change = d3.select("#"+id_current)
+                      .attr("opacity",0.3);
+    }
+
+  })
+
+  // Append Data According to Constituency 
+  candi_text.selectAll("tspan")
+            .data(candidates_selected)
+            .enter()
+            .append("tspan")
+            .attr("class","candidate_names")
+            .style("fill",function(d,i){
+              var i = main_parties.findIndex(e=>e==d.party_name);
+              return party_colors[i];
+            })
+            .attr("x",60)
+            .attr("y",function(d,i){return 600+(i*34)})
+            .text(function(d,i){
+              return (i+1)+". "+d.Candidate;
+            })
+            .append("a")
+            .attr("href","https://www.amazon.com/")
+            .append("tspan")
+            .style("fill","white")
+            .text ("    - ")
+            .append("tspan")
+            .style("fill",function(d,i){
+              // if no manifesto . Make it white and change text.
+              var i = main_parties.findIndex(e=>e==d.party_name);
+              return party_colors[i];
+            })
+            .attr("class","manifesto")
+            .style("opacity",0.6)
+            .on("mouseover",function(d,i){
+              d3.select(this).style("opacity",1.0);
+            })
+            .on("mouseout",function(d,i){
+              d3.select(this).style("opacity",0.6);
+            })
+            .text(function(d,i){
+              return d.Party+" "+"Manifesto"});
+
+
+}
+
+function reset_lines()
+{
+  data.forEach(d=>{
+    var id_current = "Gujarat-" + d.party_name + "-" + d.Education.split(" ").join("_") + "-" + d.Criminal_Cases +"-"+ d.Candidate.split(" ").join("_");
+      
+    var change = d3.select("#"+id_current)
+                      .attr("opacity",1.0)
+                      .attr("d",function(d,i){
+                        var par_y = d.parent.y;
+                        var par_x = d.parent.x;
+
+                return "M" + project(d.x, d.y)
+                + "C" + project(d.x, (d.y+ par_y) / 2)
+                + " " + project(par_x, (d.y + par_y) / 2)
+                + " " + project(par_x,par_y);
+                      });
+      
+    var circle_id = d3.select("#"+id_current+"_category_arcs");
+    circle_id.attr("transform", function(d) { 
+                    return "translate(" + project(d.x, d.y) + ")"; })
+               .attr("opacity",1.0)
+               .select("circle")
+               .attr("r",2)
+               .attr("opacity",0.5);
+
+    circle_id.select(".cand_index").remove();
+
+  })
+
+  candi_text.selectAll("tspan").remove();
+}
+
+});
+
+function replace_space(string)
+{
+    var return_string_1 = string.split(" ").join("_");
+    var return_string = return_string_1.split(".").join("_");
+    return return_string;
+}
+
+function project(x, y) {
+  var angle = (x - 90) / 180 * Math.PI, radius = y;
+  return [radius * Math.cos(angle), radius * Math.sin(angle)];
+}
+
+</script>	
+
+
+</body>
+</html>

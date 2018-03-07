@@ -1,0 +1,55 @@
+body {
+	background-color: #f9f6ea
+}
+
+#main
+{
+	position:absolute;
+	font-family: sans-serif;
+	text-align: center;
+	top:35%;
+	left:50%;
+	transform: translateX(-50%);
+	color:#e0e03e;
+}
+
+#heading
+{
+	font-size: 5.0em;
+	font-weight: bolder;
+}
+
+#slogan
+{
+	font-size: 1.2em;
+	font-weight: lighter;
+	color: #152847;
+}
+
+#description
+{
+	font-size: 1.0em;
+	font-family: helvetica;
+	color:black;
+	/*text-align :justify;*/
+	color:#404040;
+	font-weight: lighter;
+}
+
+.btn {
+  -webkit-border-radius: 6;
+  -moz-border-radius: 6;
+  border-radius: 6px;
+  font-family: Arial;
+  color: #e0e03e;
+  font-size: 15px;
+  background: #f9f6ea;
+  padding: 5px 34px 5px 34px;
+  border: solid #e0e0e0 1px;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #c7c4b9;
+  text-decoration: none;
+}

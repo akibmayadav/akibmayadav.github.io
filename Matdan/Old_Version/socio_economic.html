@@ -1,0 +1,381 @@
+<html>
+<head>
+<title> SLIDE- 10-12 (SOCIO ECONOMIC FACTORS)</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<link rel="stylesheet" type="text/css" href="Style/main_socio_economic.css">
+<body>
+<div id="slide10introductionText" style= "position:absolute"></div>
+<div id="Domain_Selector"></div>
+<div id="Radialgraph" style= "position:absolute"></div>
+<div id="Streamgraph" style= "position:absolute"></div>
+<div id="Streamgraph_text" style= "position:absolute"></div>
+<img id= "left_arrow" src = "Assets/arr.png" onClick="left_move()">
+<img id= "right_arrow" src = "Assets/arr.png" onClick="right_move()">
+
+<script>
+
+var which_slide = 10; 
+var slider = 10; 
+
+var categories = ["GEN","SC","ST"];
+var category_colors = ['#dd6a6a','#4089ef','#3fc155'];
+
+var parties = ["INC","BJP","AIRJP","IND","JD","SP","JD(U)","NCP","BJNKP","GPP"];
+
+var party_colors = ["#009e73","#d55e00","#cc79a7","#0072b2","#f0e442","#c1325f","#404040","#3b939b","#6c4a8c","#d15555"];
+
+var socio_economic_domains = ["Economy","Literacy","Women Safety","Health"];
+
+// Helper functions
+var left_move, right_move;
+
+function economy_viz_data(economy_data_viz)
+	{
+		var economy_data_streamgraph_key = ["Agriculture","Manufacturing","Transport","Realestate","Banking","Construction","Other","Electricity","Railways","Mining","Communication"];
+		
+		var return_data =[];
+
+		economy_data_viz.forEach(function(d){
+				var temp_data = {};
+				temp_data.Years = new Date(parseInt(d.Years),0,0)
+				economy_data_streamgraph_key.forEach(
+					function(e){
+						temp_data[e] = parseInt(d[e]);
+					})
+				return_data.push(temp_data);
+		});
+		
+		return [return_data,economy_data_streamgraph_key];		
+	}
+
+// Radial Graph
+// Visualization placeholder parameters
+var width_radialgraph = window.innerWidth-100;
+var height_radialgraph = window.innerHeight/2;
+
+$('#Radialgraph').css("left",0);
+$('#Radialgraph').css("top",0);
+
+// Stream Graph
+// Visualization placeholder parameters
+var width_streamgraph = window.innerWidth;
+var height_streamgraph = 2*window.innerHeight/3;
+
+$('#Streamgraph').css("left",0);
+$('#Streamgraph').css("bottom",0);
+
+// SVG the visualization 
+var mainVisualizationCanvas = d3.select("#mainVisualization").append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 1000 600")
+     .attr("class", "mainsvg");
+
+$('body').css("background-color","#f9f6ea");
+
+d3.queue()
+	.defer(d3.csv,"Data/Final_Political_Data.csv")
+	.defer(d3.csv,"Data/12_Economy_GSDP.csv")
+	.await(function(e,pol_data,economy_data){
+
+	$("#Economy_selector").css("background-color",'#e0dd2a');
+
+	// Visualization Code Goes here. 
+	// left arrow
+	left_move= function(){
+	if ( slider >10) { slider = slider-1;slide_implement(slider); 
+	}
+	else location.href="old_version.html?slider=9"}
+
+	// right arrow
+	right_move = function(){
+	if (slider <12) { slider = slider+1; slide_implement(slider);}
+	else location.href="socio_economic.html" }
+	
+	function slide_implement(slider)
+	{
+		switch(slider) 
+		{
+		case 10 : slide_10(); break;
+		case 11 : slide_11(); break;
+		case 12 : slide_12(); break;
+		}
+	}
+
+	// Code for every slide 
+	slide_implement(slider);
+	function slide_10()
+	{
+		$('#Radialgraph_Viz').remove();
+		$('#Radialgraph').css("width",0);
+		$('#Radialgraph').css("height",0);
+		
+		$("#slide10introductionText").html(
+			"The candidates elected from every constituency represent the voters interest at the Legislative Assembly and are called <b> MEMBERS OF LEGISLATIVE ASSEMBLY (MLA) </b>. <br> They representation of these concerns are reflected in the socio economic parameters of the state. Further on we will look into these parameters to see if the governments were able to stand upto their manifestos."
+			)
+	}
+	
+	function slide_11()
+	{
+		$('#Streamgraph_Viz').remove();
+		$("#Streamgraph_text").html("");
+		$("#slide10introductionText").html("");
+		$(".domain").remove();
+		var radial_graph_left_pos = (window.innerWidth-width_radialgraph)/2;
+     	$('#Radialgraph').css("width",width_radialgraph);
+		$('#Radialgraph').css("height",height_radialgraph);
+		$('#Radialgraph').css("left",radial_graph_left_pos);
+
+
+		var viewbox_radial = "0 0 "+width_radialgraph+" "+height_radialgraph;
+		var radialgraph_canvas = d3.select("#Radialgraph")
+								    .append("svg")
+								    .attr("id","Radialgraph_Viz")
+     								.attr("xmlns","http://www.w3.org/2000/svg")
+     								.attr("viewBox",viewbox_radial);
+
+     	var radialgraph_margin = {"top":70, "bottom":70 ,"left" :40 ,"right" :40,"between":70};
+
+     	var election_years = d3.nest()
+     							.key(function(d){return d.Year})
+     							.entries(pol_data);
+		
+		var circle_dia_1 = (width_radialgraph-radialgraph_margin.left-radialgraph_margin.right-(election_years.length*radialgraph_margin.between))/election_years.length;
+		var circle_dia_2 = height_radialgraph-radialgraph_margin.top-radialgraph_margin.bottom;
+		var circle_dia = (circle_dia_1>circle_dia_2)?circle_dia_2:circle_dia_1;
+
+		var extra_left_margin = (width_radialgraph-radialgraph_margin.left-radialgraph_margin.right-(election_years.length*circle_dia)-((election_years.length-1)*radialgraph_margin.between))/2;		
+		
+		// Radialgraph
+		var radials = radialgraph_canvas.append("g")
+										.attr("id","radials_outline")
+										.selectAll("circle")
+										.data(election_years)
+										.enter()
+										.append("circle")
+										.attr("id",function(d,i){
+											return d.key+"_radial"
+										})
+										.attr("r",circle_dia/2)
+										.attr("cx",function(d,i){
+											return extra_left_margin+radialgraph_margin.left+circle_dia/2+(i*(circle_dia+radialgraph_margin.between))
+										})
+										.attr("cy",height_radialgraph/2)
+										.attr("stroke","black")
+										.attr("stroke-width",0.1)
+										.attr("fill","white")
+										.attr("opacity",0.5);
+
+		// Labels
+		var label = radialgraph_canvas.append("g")
+										.attr("id","radials_label")
+										.selectAll("text")
+										.data(election_years)
+										.enter()
+										.append("text")
+										.attr("id",function(d,i){
+											return d.key+"_radial"
+										})
+										.attr("x",function(d,i){
+											return extra_left_margin+radialgraph_margin.left+circle_dia/2+(i*(circle_dia+radialgraph_margin.between))
+										})
+										.attr("y",60)
+										.text(function(d,i){return d.key})
+										.attr("fill","#404040")
+										.attr("opacity",1.0)
+										.attr("stroke-width",0.2);
+
+		//Lines for every GSDP type
+		var gsdp_radial_lines = radialgraph_canvas.append("g")
+		
+
+	}
+	
+	// Streamgragh insipired by Harry Stevens streamgraph, https://bl.ocks.org/HarryStevens/c893c7b441298b36f4568bc09df71a1e
+	
+	function slide_12()
+	{
+		which_slide= 12; 
+
+		// Clearing previous things 
+		$('#Radialgraph_Viz').remove();
+		$('#Radialgraph').css("width",0);
+		$('#Radialgraph').css("height",0);
+
+		// Intializing 
+		$('#Streamgraph').css("width",width_streamgraph);
+		$('#Streamgraph').css("height",height_streamgraph);
+
+		var viewbox_stream = "0 0 "+width_streamgraph+" "+height_streamgraph;
+		var streamgraph_canvas = d3.select("#Streamgraph")
+								    .append("svg")
+								    .attr("id","Streamgraph_Viz")
+     								.attr("xmlns","http://www.w3.org/2000/svg")
+     								.attr("viewBox",viewbox_stream)
+		// Streamgraph
+
+    	var colorrange = ['#ffd92f','#fc8d62','#8da0cb','#66c2a5','#e78ac3','#a6d854','#e5c494','#404040','#404040','#404040','#404040','#404040','#404040'];
+
+		var economy_text = "We look into the trends of <b>economic development </b> of Gujarat by looking into contribution of different sectors to the GSDP (Gross State Domestic Product) of the state over the years. The work of a political party during its reign must lead to improvement and hence increase in the GSDP. The sectors we look into are <b><font color= '#ffd92f'>Agriculture,</font></b> <b><font color= '#fc8d62'>Manufacturing,</font></b> <b><font color= '#8da0cb'>Transport,</font></b> <b><font color= '#66c2a5'>Real Estate,</font></b> <b><font color= '#e78ac3'>Banking,</font></b> <b><font color= '#a6d854'>Construction,</font></b> <b><font color= #e5c494>Other,</font></b> <b><font color= '#404040'>Electricity,</font></b> <b><font color= '#404040'>Railways,</font></b> <b><font color= '#404040'>Mining</font></b> and <b><font color= '#404040'>Communication.</font></b>"
+
+		var final_data = economy_viz_data(economy_data);
+		$("#Streamgraph_text").html(economy_text);
+
+		d3.select("#Domain_Selector")
+		.selectAll("div")
+		.data(socio_economic_domains)
+		.enter()
+		.append("div")
+		.attr("class","domain")
+		.style("width",window.innerWidth/socio_economic_domains.length)
+		.style("left",function(d,i){
+			return i*window.innerWidth/socio_economic_domains.length
+		})
+		.attr("id",function(d,i){return d+"_selector"})
+		.style("background-color","#e0d8ba")
+		.html(function(d,i){return d})
+		.on("click",function(d,i){
+			$(".domain").css("background-color",'#e0d8ba');
+			$(this).css("background-color",'#918c7a');
+			switch(d){
+				case("Economy"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+					$("#Streamgraph_text").html(economy_text);
+				}; break;
+				case("Inequalities"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+				}; break;
+				case("Literacy"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+				}; break;
+				case("Women Safety"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+				}; break;
+				case("Health"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+				}; break;
+				case("Environment"): {
+					final_data = economy_viz_data(economy_data);
+					streamgraph_rendering(final_data);
+				}; break;
+			}
+		})
+
+		$("#Economy_selector").css("background-color",'#918c7a');
+		streamgraph_rendering(final_data);
+		
+		function streamgraph_rendering(which_data)
+		{
+
+		$(".stream").remove();
+		$("#x_axis_years").remove();
+
+		var stack = d3.stack()
+						.keys(which_data[1])
+						.order(d3.stackOrderReverse)
+						.offset(d3.stackOffsetSilhouette);
+
+    	var layers = stack(which_data[0]);
+
+    	var x_scale = d3.scaleTime()
+    					.range([0,width_streamgraph])
+    					.domain(d3.extent(which_data[0],function(d){return(d.Years)}));
+    	
+    	var y_scale = d3.scaleLinear()
+    					.range([0,height_streamgraph/2-10])
+    					.domain([d3.max(layers,function(d){return d3.max(d,function(e){return(e[1])});}),0]);
+
+    	var area = d3.area()
+    			.curve(d3.curveCardinal)
+    			.x(function(d) { 
+    				return x_scale(d.data.Years); })
+    			.y1(function(d) { return y_scale(d[0])+0.2; })
+    			.y0(function(d) { 
+    				return y_scale(d[1])+0.2;});
+
+    	var tooltip_line = d3.select("body").append("div")
+    								.attr("class","tooltip_line")
+    								.style("visibility","hidden")
+    								.style("position","absolute")
+    								.style("top",window.innerHeight/3)
+    								.style("width",2)
+    								.style("height",window.innerHeight)
+    								.style("background-color","#f9f6ea")
+
+    	var tooltip_text = d3.select("body").append("div")
+    								.attr("class","tooltip")
+    								.style("visibility","hidden");
+    	
+    	var streams = streamgraph_canvas.selectAll("path")
+    									.data(layers)
+    									.enter()
+    									.append("path")
+    									.attr("class","stream")
+    									.attr("id",function(d){ return (d.key+"_stream")})
+    									.attr("d",function(d){ return area(d)})
+    									.attr("fill",function(d,i){
+    										return colorrange[i];
+    									})
+    									.attr("opacity",1.0)
+    									.attr("stroke","white")
+    									.attr("stroke-width",0.6)
+    									.on("mouseover",function(d,i){
+    										$(".stream").attr("opacity",0.6);
+    										$(this).attr("opacity",1);
+
+    									})
+    									.on("mouseout",function(d,i){
+    										$(".stream").attr("opacity",1);
+    					tooltip_text.style("visibility","hidden");
+    					tooltip_line.style("visibility","hidden");
+    									})
+    									.on("mousemove",function(d,i){
+
+    				var x_position = d3.mouse(this)[0];
+    				var tooltip_x = x_position;
+    				if (tooltip_x > 3*window.innerWidth/4) {
+    					tooltip_x = tooltip_x - 190;
+    				}
+    				
+    				var year = x_scale.invert(x_position).getFullYear();
+    				var category = d.key;
+    				var value_index = d.findIndex(data=>data.data.Years.getFullYear()==year);
+    				var value = d[value_index].data[category];
+    				
+    				var text = "<div class='year'>" + year + "</div><div class='key'><div style='background:" + colorrange[i] + "' class='swatch'>&nbsp;</div> <div class='category'>" + which_data[1][i] + "</div><div class='value'> GSDP : " + value + " Lakh &#8377 " + "</div>"
+
+    				tooltip_text.style("visibility","visible")
+    							.html(text)
+    							.style("left", tooltip_x + "px")
+               					.style("top",window.innerHeight/3);
+
+               		tooltip_line.style("visibility","visible")
+               					.style("left", x_position+10 + "px");
+    									});   									
+    	var x_axis = streamgraph_canvas.append("g")
+    				.attr("id","x_axis_years")
+      				.attr("transform", "translate(0," + (height_streamgraph-20) + ")")
+      				.call(d3.axisBottom(x_scale))
+      				.attr("opacity",0.5);
+
+
+		}
+		
+
+
+		
+	}
+	});
+
+</script>	
+
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+body {
+	background-color: #f9f6ea;
+}
+
+#main
+{
+	position:absolute;
+	font-family: sans-serif;
+	text-align: center;
+	top:2%;
+	left:50%;
+	padding : 10px;
+	width :80%;
+	transform: translateX(-50%);
+	color:#e0e03e;
+}
+
+#heading
+{
+	font-size: 2.0em;
+	font-weight: bolder;
+}
+
+#slogan
+{
+	font-size: 1.2em;
+	font-weight: lighter;
+	color: #152847;
+}
+
+#description
+{
+	font-size: 1.0em;
+	font-family: helvetica;
+	color:black;
+	text-align :justify;
+	color:#404040;
+	font-weight: lighter;
+}
+
+.thumb
+{
+	width : 30%;
+}

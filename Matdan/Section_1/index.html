@@ -1,0 +1,678 @@
+<html>
+<head>
+<title> SECTION 1 : HISTORICAL POLITICAL DATA VISUALIZATION</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<link rel="stylesheet" type="text/css" href="Style/section1_main.css">
+<body>
+<img id= "up_arrow" src = "Assets/arr.png" onClick="up_move()">
+<img id= "down_arrow" src = "Assets/arr.png" onClick="down_move()">
+<div id ="logo"> MATDAN </div>
+<div id ="close" onClick = "document.location.href='../start.html';"> x </div>
+<div id="mainVisualization" style= "position:absolute"></div>
+<div id="slidetext" style= "position:absolute"></div>
+<script>
+
+// Sliders Initialisations
+var slide_number = 1;
+var left_move ,right_move;
+
+// Background Color
+$('body').css("background-color","#f9f6ea");
+
+var categories = ["GEN","SC","ST"];
+var category_colors = ['#fee0d2','#fc9272','#de2d26'];
+
+var parties = ["BJP","INC","AIRJP","IND","JD","SP","JD(U)","NCP","BJNKP","GPP"];
+
+var parties_for_color = ["BJP","INC","AIRJP","IND","JD","JD(U)","NCP","Others"];
+
+var party_colors = ['#fc8d62','#3a9ab2','#8da0cb','#ffd92f','#e78ac3','#a6d854','#8038b7','#f44b42'];
+
+// SVG for the visualization 
+var visualization_size = (window.innerHeight<window.innerWidth)?window.innerHeight:window.innerWidth;
+
+visualization_size = visualization_size -10;
+
+var text_height = visualization_size;
+var text_width = 0.6*visualization_size;
+var space_middle = 30; 
+
+var leftover_width_temp = window.innerWidth - text_width-visualization_size-space_middle ; 
+
+var left_position_text = leftover_width_temp>0?leftover_width_temp/2+visualization_size+space_middle:visualization_size+space_middle;
+
+var left_position_viz = leftover_width_temp>0?leftover_width_temp/2:0;
+
+var arrow_left = left_position_text+text_width/2;
+d3.select("#up_arrow").style("left",arrow_left+"px");
+d3.select("#down_arrow").style("left",arrow_left+"px");
+
+var mainVisualizationCanvas = d3.select("#mainVisualization")
+	 .style("left",(left_position_viz)+"px")
+	 .append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 1000 1000")
+     .attr("width",visualization_size)
+     .attr("height",visualization_size)
+     .attr("class", "mainsvg");
+
+
+var visualization_text = d3.select("#slidetext")
+							.style("left",(left_position_text)+"px")
+							.style("top",window.innerHeight/2)
+							.style("width",text_width)
+							.style("transform","translateY(-50%)");
+
+var tooltip = d3.select("body")
+				.append("div")
+    			.attr("class","tooltip")
+    			.style("visibility","hidden");
+
+var viz_size = 1000;
+var arc_width = 30;
+var category_arc_width = 6; 
+var radius_scale = d3.scaleLinear()
+						.range([200,viz_size/2-50]);
+
+
+d3.csv("Data/Gujarat_Historical_Data.csv",function(error,data)
+{
+	if(error) throw error;
+
+	console.log(data);
+	var years = d3.nest()
+				  .key(function(d){ return d.Year})
+				  .entries(data);
+
+	var par = d3.nest()
+				  .key(function(d){ return d.Party})
+				  .entries(data);
+	console.log(par);
+
+	radius_scale.domain(d3.extent(years,function(d,i){
+		return parseInt(d.key);
+	}))
+
+	var constituency_data_temp_1 = d3.nest()
+							.key(function(d){ return d.AC_Name})
+							.entries(data)
+
+	// SORT HERE !
+	var constituency_data_temp_2 = [];
+	parties.forEach(function(p,i){
+		constituency_data_temp_1.forEach(function(d,i){
+		if(d.values.length==4)
+		{
+			if(d.values[3].Party == p)
+			{
+				constituency_data_temp_2.push(d);
+			}
+		}
+		else if (d.values.length==3)
+		{
+			if(d.values[2].Party == p)
+			{
+				constituency_data_temp_2.push(d);
+			}
+		}
+		else if(d.values.length==1)
+		{
+			if(d.values[0].Party == p)
+			{
+				constituency_data_temp_2.push(d);
+			}
+		}
+	})
+	})
+	
+	var constituency_data = constituency_data_temp_2;
+	
+	var label_angle = 20;
+	var label_angle_rad = (label_angle/180)*Math.PI;
+	var angle = (2*Math.PI-label_angle_rad)/constituency_data.length;
+
+/********************************************************/
+/*** Year Labels. ***/
+/********************************************************/
+
+	function arc_make(startAngle,endAngle,innerRadius,outerRadius)
+	{
+	var arci = d3.arc()
+				.innerRadius(innerRadius)
+				.outerRadius(outerRadius)
+				.startAngle(startAngle)
+				.endAngle(endAngle)
+
+	return arci;
+	}
+
+	var angle_for_label = (label_angle-15)*Math.PI/180;
+
+	var year_labels_lines = mainVisualizationCanvas.append("g")
+								.attr("id","year_labels_lines")
+								.attr("transform","translate(500,500)")
+								.selectAll("path")
+								.data(years)
+								.enter()
+								.append("path")
+								.attr("id",function(d,i)
+								{
+									return d.key+"_label_lines"
+								})
+								.attr("d", function(d,i){
+									var radius = radius_scale(parseInt(d.key));
+									return arc_make(0,2*Math.PI,radius-arc_width/2,radius+arc_width/2)();
+								})
+								.attr("fill","black")
+								.attr("opacity",0.0)
+
+		var year_labels = mainVisualizationCanvas.append("g")
+								.attr("id","year_labels")
+								.attr("class","label")
+								.attr("transform","translate(500,500)")
+								.selectAll("path")
+								.data(years)
+								.enter()
+								.append("text")
+								.attr("id",function(d,i)
+								{
+									return d.key+"_label"
+								})
+								.attr("y", function(d,i){
+									var radius = radius_scale(parseInt(d.key));
+									return radius+7;
+								})
+								.html(function(d,i){return d.key})
+								.attr("fill","black")
+								.attr("opacity",0.0)
+
+/********************************************************/
+/*** Hovering Labels Initialisation ***/
+/********************************************************/
+ 	// Helper Function 
+ 	
+ 	var toTitleCase = function (string)
+	{
+		var split_string=string.split("_");
+		var new_string=[];
+		for ( var a =0 ; a<split_string.length ;a++)
+		{
+			var m = split_string[a][0].toUpperCase();
+			var conti = split_string[a].slice([1]).toLowerCase();
+			new_string.push(m+conti);
+		}
+		var joined = new_string.join(" ");
+		return joined;
+	}
+
+/*******************************************/
+
+/********************************************************/
+/*** Consituency arcs colored with the party that won elections that year.***/
+/********************************************************/
+
+	// Helper Functions
+	var const_party_arc = d3.arc()
+					.innerRadius(function(d,i){
+						var innerRadius = radius_scale(parseInt(d.Year));
+						return innerRadius-arc_width/2;
+					})
+					.outerRadius(function(d,i){
+						var gender_based_length = 0 ;
+						if(d.Sex=="F"){
+							gender_based_length = 12;
+						}
+						return (radius_scale(parseInt(d.Year))+arc_width/2 + gender_based_length)
+					})
+					.startAngle(function(d,i){
+						var index = constituency_data.findIndex(data=>data.key == d.AC_Name);
+						return index*angle;
+					})
+					.endAngle(function(d,i){
+						var index = constituency_data.findIndex(data=>data.key == d.AC_Name);
+						return (index+1)*angle;
+					})
+
+
+	var const_party = mainVisualizationCanvas.append("g")
+							.attr("id","constituency_party")
+							.attr("transform","translate(500,500) rotate("+(180+label_angle/2)+")")
+							.selectAll("g")
+							.data(constituency_data)
+							.enter()
+							.append("g")
+							.attr("id",function(d,i){return(d.key)+"_constituency_party_viz"})
+							.selectAll("path")
+							.data(function(d,i){return d.values})
+							.enter()
+							.append("path")
+							.attr("class","party_arcs")
+							.attr("id",function(d,i){
+								return d.AC_Name+"_"+d.Year+"_party_viz";
+							})
+							.attr("d",const_party_arc)
+							.attr("fill",function(d,i){
+								return "#e0e03e";
+							})
+							.attr("stroke","#f9f6ea")
+							.attr("stroke-width",0.3)
+							.attr("opacity",0.0)
+							.on("mouseover",function(d,i){
+								
+								if (slide_number >1)
+								{
+
+								d3.selectAll(".party_arcs")
+									.attr("opacity",0.3)
+
+								if (slide_number>=4)
+								{
+									const_category.attr("opacity",function(e,i){
+									var opac =0.3;
+									if(d.AC_Name==e.AC_Name)
+									{
+										opac = 1.0;
+									}
+									return opac;
+									})
+								}
+
+								for ( var y = 0; y<years.length ;y++)
+								{
+									var id = d.AC_Name+"_"+years[y].key+"_party_viz";
+									d3.select("#"+id).attr("opacity",1.0);
+								}
+								
+								d3.select("#"+d.AC_Name+"_"+d.Year+"_party_viz").attr("opacity",1.0);
+
+								// ToolTip Labelling
+
+								var left = event.clientX+30;
+								var temp_top = event.clientY+10;
+
+								var top = (temp_top>window.innerHeight-100)?(top= temp_top-100):top=temp_top+30;
+
+								var text = "<g class ='const'>" +
+								d.Year + " : "+ (d.AC_Name.split("_").join(" ")) +"</g><br><g class='extra'>" + toTitleCase(d.Cand) +"</g><hr color='black'>"+d.Party+" | "+d.AC_Type+" | "+d.Turnout+"% ";
+
+								tooltip.style("top",top+"px")
+										.style("left",left+"px")
+										.style("visibility","visible")
+										.style("background-color",party_colors[parties.findIndex(data=>data==d.Party)])
+										.style("opacity",0.9)
+										.html(text)
+
+							    if ( slide_number <5) {
+							    	tooltip.style("background-color","#e0e03e")
+							    }
+							    else {
+							    	tooltip.style("background-color",party_colors[parties.findIndex(data=>data==d.Party)])
+							    } 
+							}
+
+
+							})
+							.on("mouseout",function(d,i){
+								
+								if(slide_number == 2)
+								{const_party.attr("opacity",1.0);}
+								
+								if(slide_number == 3)
+								{
+									const_party.attr("opacity",function(d,i){
+										if(d.Year == "2012") {return 1.0}
+											else return 0.3;
+								});
+								}
+
+								if(slide_number == 4)
+								{
+									const_party.attr("opacity",0.3
+										);
+									const_category.attr("opacity",1.0);
+								}
+
+								if(slide_number == 5)
+								{
+									const_party.attr("opacity",1.0);
+									const_category.attr("opacity",1.0);
+								}
+
+								if(slide_number == 6)
+								{
+									const_party.attr("opacity",function(d,i){
+										if(d.Sex == "F") {return 1.0}
+										else return 0.3;
+										});
+									const_category.attr("opacity",function(d,i){
+										if(d.Sex == "F") {return 1.0}
+										else return 0.3;
+										});
+								}
+
+								if (slide_number == 7)
+								{
+									const_party.attr("opacity",0.3
+										);
+									const_category.attr("opacity",0.3);
+								}
+
+
+								if (slide_number == 8)
+								{
+									const_party.attr("opacity",1.0
+										);
+									const_category.attr("opacity",1.0);
+								}
+
+								tooltip.style("visibility","hidden")
+							})
+
+/********************************************************/
+/*** Color Mapped Voter Turnout Sparklines ***/
+/********************************************************/
+var turnout_scale = d3.scaleLinear()
+							.domain([0,100])
+							.range([2,30]);
+
+var sparkline_data = function (year)
+{
+	
+	var return_data =[];
+
+	constituency_data.forEach(function(data,i){	
+		var year_index = data.values.findIndex(data=>parseInt(data.Year)==year);
+		var turnout = (year_index>=0)?parseFloat(data.values[year_index].Turnout):0;
+		var final = {};
+		
+		final.innerradius = radius_scale(year)-turnout_scale(turnout)-arc_width/2; 
+		final.outerradius = radius_scale(year)-arc_width/2; 
+		final.angle = i*angle + (angle/2); 
+		return_data.push(final);
+	})
+
+
+	return return_data;
+}
+
+var sparkline = d3.areaRadial()
+		.curve(d3.curveCardinal)
+  		.angle(function(d) { return d.angle; })
+  		.outerRadius(function(d) { return d.outerradius; })
+  		.innerRadius(function(d) { return d.innerradius; })
+
+var arcs = mainVisualizationCanvas.append("g")
+								.attr("id","Voter_Turnout_Areas")
+								.attr("transform","translate(500,500) rotate("+(180+label_angle/2)+")")
+								.selectAll("g")
+								.data(years)
+								.enter()
+								.append("g")
+								.attr("id",function(d,i){
+									return(d.key)+"_constituency_turnout_viz_clipper"})
+								.append("path")
+								.attr("id",function(d,i){
+									return(d.key)+"_turnout_area"})
+								.attr("d",function(d,i){
+									return sparkline(sparkline_data(parseInt(d.key)))
+								})
+								.attr("fill","black")
+								.attr("stroke",function(d,i){
+									return "black";
+								})
+								.attr("stroke-width",1)
+								.attr("opacity",0.0)
+
+/********************************************************/
+/*** Consituency category arcs opacity with the category.***/
+/********************************************************/
+
+	var const_category_arc = d3.arc()
+					.innerRadius(function(d,i){
+						var innerRadius = radius_scale(parseInt(d.Year));
+						return innerRadius-arc_width/2;
+					})
+					.outerRadius(function(d,i){
+						return (radius_scale(parseInt(d.Year))-arc_width/2+category_arc_width)
+					})
+					.startAngle(function(d,i){
+						var index = constituency_data.findIndex(data=>data.key == d.AC_Name);
+						return index*angle;
+					})
+					.endAngle(function(d,i){
+						var index = constituency_data.findIndex(data=>data.key == d.AC_Name);
+						return (index+1)*angle;
+					})
+
+	var const_category = mainVisualizationCanvas.append("g")
+							.attr("id","constituency_category")
+							.attr("transform","translate(500,500) rotate("+(180+label_angle/2)+")")
+							.selectAll("g")
+							.data(constituency_data)
+							.enter()
+							.append("g")
+							.attr("id",function(d,i){return(d.key)+"_constituency_category_viz"}).selectAll("path")
+							.data(function(d,i){return d.values})
+							.enter()
+							.append("path")
+							.attr("class","category_arcs")
+							.attr("id",function(d,i){
+								return d.AC_Name+"_"+d.Year+"_category_viz";
+							})
+							.attr("d",const_category_arc)
+							.attr("fill",function(d,i){
+								var col_id = categories.findIndex(data=>data==d.AC_Type);
+								return category_colors[col_id];
+							})
+							.attr("opacity",0.0)
+							.attr("stroke","black")
+							.attr("stroke-width",0);
+
+/********************************************************/
+/*** Grid arcs opacity for better viewing.***/
+/********************************************************/
+
+	var grid_arc = d3.arc()
+					.innerRadius(radius_scale(1998)-arc_width/2-30)
+					.outerRadius(radius_scale(2012)+arc_width/2+5)
+					.startAngle(function(d,i){
+						return i*angle;
+					})
+					.endAngle(function(d,i){
+						return (i+1)*angle;
+					})
+
+	var grid = mainVisualizationCanvas.append("g")
+								.attr("id","constituency_grid")
+								.attr("transform","translate(500,500) rotate("+(180+label_angle/2)+")")
+								.selectAll("path")
+								.data(constituency_data)
+								.enter()
+								.append("path")
+								.attr("class","constituency_grid")
+								.attr("id",function(d,i){return(d.key)+"_constituency_grid"})
+								.attr("d",grid_arc)
+								.attr("fill","none")
+								.attr("opacity",0.0)
+								.attr("stroke","black")
+								.attr("stroke-width",1.0)
+
+/********************************************************/
+/*** Visualization Text***/
+/********************************************************/
+	up_move= function()
+	{
+	if ( slide_number >1) 
+	{ 
+		slide_number = slide_number-1;
+		slide_implement(slide_number); 
+	}
+	else 
+	{
+		slide_number = 8; // keep increasing according to the number of slides implemented. 
+		slide_implement(slide_number); 
+	}
+	}
+
+	down_move = function()
+	{
+	if (slide_number <8) 
+	{ 
+		slide_number = slide_number+1;
+		slide_implement(slide_number);
+	}
+	else 
+	{
+		slide_number = 1;
+		slide_implement(slide_number);
+	}
+	
+	}
+	
+	function slide_implement(slide_number)
+	{
+		switch(slide_number) 
+		{
+		case 1 : slide_1(); break;
+		case 2 : slide_2(); break;
+		case 3 : slide_3(); break;
+		case 4 : slide_4(); break;
+		case 5 : slide_5(); break;
+		case 6 : slide_6(); break;
+		case 7 : slide_7(); break;
+		case 8 : slide_8(); break;
+		}
+	}
+
+	slide_implement(slide_number);
+
+	function slide_1()
+	{
+		visualization_text.html("Gujarat State Legislative Elections are held once every <b> 5 Years. </b> We democratically elect our leader (Member of Legislative Assembly) once every 5 years. In Gujarat we made this decision in 2012, 2007, 2002 and 1998.");
+
+		// Visible 
+		year_labels.attr("opacity",0.0);
+		year_labels.attr("opacity",0.0);
+		year_labels.transition()
+						 .delay(function(d,i){ return i*400})
+						 .attr("opacity",1.0)
+
+		year_labels_lines.transition()
+							.delay(function(d,i){ return i*400})
+							.attr("opacity", 0.05)
+
+
+		// Hiding 
+		const_party.attr("opacity", 0.0);
+		const_category.attr("opacity",0.0);
+		arcs.attr("opacity",0.0);
+		const_party.attr("fill","#e0e03e")
+
+	}
+
+	function slide_2()
+	{
+		visualization_text.html("The state of Gujarat is divided into <font color ='#e0e03e'><b> 182 </b> </font> geographical areas called constituencies. The residents of every constituency elect an MLA, who represents them in the Vidhan Sabha. Constituencies hold equally divided populations to ensure equal representation of the electorate in the house. <br> <b> Every yellow arc <img src = 'Assets/constituency_image_2.png' height='30px' display='inline-block'> represents a constituency. <b>" );
+
+		const_party.transition()
+					.delay(function(d,i){ 
+						return i*200;
+					})
+					.attr("opacity",1.0);
+
+	}
+
+	function slide_3()
+	{
+		visualization_text.html("Following the 2001 census, in the year 2008 the delimitation commision was implemented in Gujarat to ensure equal population in every constituency. This led to change in some of the consituencies for 2012 elections.");
+
+		const_party.transition()
+					.attr("opacity",function(d,i){
+						if(d.Year == "2012") {return 1.0}
+							else return 0.3;
+					});
+
+		const_category.attr("opacity",0.0)
+	}
+
+	function slide_4()
+	{
+
+		visualization_text.html("Depending on the population distribution of a constituency, constituencies are categorized. The three categories are <b> <font color='#fc9272'>SC (Scheduled Caste)</font>, <font color='#de2d26'>ST (Scheduled Tribe)</font> and <font color='#fee0d2'>GEN (General)</font></b>. <br><br> <b>1998</b>   <font color='#fc9272'>  SC:26 </font> | <font color='#de2d26'>ST:13 </font> | <font color='#fee0d2'>GEN:143 </font><br> <b>2002</b>   <font color='#fc9272'>  SC:26 </font> | <font color='#de2d26'>ST:13 </font> | <font color='#fee0d2'>GEN:143 </font><br> <b>2007</b>   <font color='#fc9272'>  SC:28 </font> | <font color='#de2d26'>ST:13 </font> | <font color='#fee0d2'>GEN:141 </font><br> <b>2012</b>   <font color='#fc9272'>  SC:27 </font> | <font color='#de2d26'>ST:13 </font> | <font color='#fee0d2'>GEN:142 </font>");
+
+		const_party.attr("opacity",0.3)
+		const_category.attr("opacity",1.0)
+		const_category.transition().attr("fill",function(d,i){
+								var col_id = categories.findIndex(data=>data==d.AC_Type);
+								return category_colors[col_id];
+							})
+		const_party.attr("fill","#e0e03e")
+
+	}
+	
+	function slide_5()
+	{
+		visualization_text.html("After every election a candidate (MLA) is elected to represent the constituency electorate in the Vidhan Sabha. The candidate is a also a representative of a political party. The major political parties present in the Gujarat political landscape are <b> <font color='#fc8d62'>BJP, </font><font color='#3a9ab2'>INC, </font><font color='#8da0cb'>AIRJP, </font><font color='#ffd92f'>IND, </font><font color='#e78ac3'>JD, </font><font color='#a6d854'> JD(U), </font><font color='#8038b7'>NCP, </font><font color='#000000'>BJNKP, </font> <font color='#000000'>SP, </font> and <font color='#000000'>GPP.</font>");
+
+		const_party.attr("opacity",1.0)
+		const_category.attr("opacity",1.0)
+		const_party.attr("fill",function(d,i){
+								var col_id = parties_for_color.findIndex(data=>data==d.Party);
+								var color = (col_id>=0)?party_colors[col_id]:party_colors[7];
+								return party_colors[col_id];
+							})
+
+	}
+
+	function slide_6()
+	{
+		visualization_text.html("The representation of women in the political landscape in India is a prime concern. Over the years Gujarat has seen an increase in the number of women MLAs. Out of the 182 candidates in the year 1998, 2002, 2007 and 2012 there were <font color ='#e0e03e'><b>4, 12, 16 and 16</b></font> women candidates.");
+
+		const_party.transition().attr("opacity",function(d,i){
+						if(d.Sex == "F") {return 1.0}
+							else return 0.3;
+					});
+		const_category.transition().attr("opacity",function(d,i){
+						if(d.Sex == "F") {return 1.0}
+							else return 0.3;
+					});
+		arcs.attr("opacity",0.0);
+
+	}
+
+	function slide_7()
+	{
+		visualization_text.html("The electorate castes their vote on the election day. The percentage of the electorate which castes valid votes on the election day is the <b> Voter Turnout. </b> This is represented by the grey area under every constituency.");
+
+		const_party.attr("opacity", 0.3);
+		const_category.attr("opacity",0.3);
+		arcs.attr("opacity",0.2);
+		
+	}
+
+	function slide_8()
+	{
+		visualization_text.style("text-align","center")
+		.html(" <b> Explore elections in different consituencies over the years in Gujarat.</b>");
+		const_party.attr("fill",function(d,i){
+								var col_id = parties_for_color.findIndex(data=>data==d.Party);
+								var color = (col_id>=0)?party_colors[col_id]:party_colors[7];
+								return party_colors[col_id];
+							})
+		const_party.attr("opacity", 1.0);
+		const_category.attr("opacity",1.0);
+		arcs.attr("opacity",0.1);
+
+	}
+
+});
+
+
+</script>	
+
+
+</body>
+</html>

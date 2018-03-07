@@ -1,0 +1,764 @@
+<html>
+<head>
+<title> Socio Economic Factors </title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<link rel="stylesheet" type="text/css" href="Style/section2_main.css">
+<body>
+<div id="Main_Visualization" style= "position:absolute"></div>
+<div id="Interaction" style= "position:absolute"></div>
+<div id ="tooltip"></div>
+<div id ="logo"> MATDAN </div>
+<div id ="close" onClick = "document.location.href='../start.html';"> x </div>
+<script>
+
+$('body').css("background-color","#152847");
+
+var parties = ["BJP","INC","AIRJP","IND","JD","JD(U)","NCP","BJNKP","GPP","SP"];
+
+var party_colors = ['#fc8d62','#3a9ab2','#8da0cb','#ffd92f','#e78ac3','#a6d854','#8038b7','#f44b42','#f44b42','#f44b42'];
+
+var socio_economic_domains = ["Economy","Literacy","Women Safety","Health"];
+// var socio_economic_colors = ['#ffd92f','#fc8d62','#8da0cb','#66c2a5'];
+
+var socio_economic_colors = ["#003459","#028090","#02C39A","#FC5185"]
+
+var colorrange = ['#ffd92f','#fc8d62','#8da0cb','#66c2a5','#e78ac3','#a6d854','#e5c494','#404040','#404040','#404040','#404040','#404040','#404040'];
+
+function economy_viz_data(economy_data_viz)
+{
+	var economy_data_streamgraph_key = ["Agriculture","Manufacturing","Transport","Realestate","Banking","Construction","Other","Electricity","Railways","Mining","Communication"];
+	
+	var return_data =[];
+
+	economy_data_viz.forEach(function(d){
+			var temp_data = {};
+			temp_data.Years = new Date(parseInt(d.Years),0,0)
+			economy_data_streamgraph_key.forEach(
+				function(e){
+					temp_data[e] = parseInt(d[e]);
+				})
+			return_data.push(temp_data);
+	});
+	
+	return [return_data,economy_data_streamgraph_key];		
+}
+
+function safety_viz_data(safety_data_viz)
+{
+	var safety_data_streamgraph_key = ["Rape","Kidnapping_Abduction","Dowry_Deaths","Domestic_Violence","Molestation","Eveteasing","Importing","SATI","Immoral_Traffic","Indecent Representation","Dowry Proh.Act"];
+	
+	var return_data =[];
+
+	safety_data_viz.forEach(function(d){
+			var temp_data = {};
+			temp_data.Years = new Date(parseInt(d.Year),0,0)
+			safety_data_streamgraph_key.forEach(
+				function(e){
+					temp_data[e] = parseInt(d[e]);
+				})
+			return_data.push(temp_data);
+	});
+	
+	return [return_data,safety_data_streamgraph_key];		
+}
+
+function literacy_viz_data(ls_i,literacy_data_viz)
+{
+	var literacy_data_streamgraph_key =[];
+	if (ls_i == 0)
+	{
+		literacy_data_streamgraph_key = ["Government Schools","Private Schools"];
+		title_text.text("Number of Primary Schools in Gujarat")
+	}
+	else if (ls_i ==1)
+	{
+		literacy_data_streamgraph_key = ["Government Enrollment", "Private Enrollment"]
+		title_text.text("Enrollment in Primary Schools in Gujarat")
+	}
+	else if (ls_i ==2)
+	{
+		literacy_data_streamgraph_key = [ "Teachers_Government", "Teachers_Private"];
+		title_text.text("Number of Teachers in Primary Schools in Gujarat")
+	}
+	
+	var return_data =[];
+
+	literacy_data_viz.forEach(function(d){
+			var temp_data = {};
+			temp_data.Years = new Date(parseInt(d.Years),0,0)
+			literacy_data_streamgraph_key.forEach(
+				function(e){
+					temp_data[e] = parseInt(d[e]);
+				})
+			return_data.push(temp_data);
+	});
+	
+	return [return_data,literacy_data_streamgraph_key];		
+}
+
+function health_viz_data(hs_i,health_data_viz)
+{
+	var health_data_streamgraph_key = [];
+	if (hs_i == 0)
+	{
+		health_data_streamgraph_key = ["IMR(M+F)", "IMR-Rural(M+F)", "IMR-Urban(M+F)"];
+		title_text.text("Infant Mortality Rate (IMR) in Gujarat")
+	}
+	else if (hs_i ==1)
+	{
+		health_data_streamgraph_key = ["Birth_Rate", "Birth_Rate_Rural", "Birth_Rate_Urban"];
+		title_text.text("Birth Rate in Gujarat")
+	}
+	else if (hs_i ==2)
+	{
+		health_data_streamgraph_key= [ "Death_Rate", "Death_Rate_Rural", "Death_Rate_Urban"];
+		title_text.text("Death Rate in Gujarat")
+	}
+	
+	var return_data =[];
+
+	health_data_viz.forEach(function(d){
+			var temp_data = {};
+			temp_data.Years = new Date(parseInt(d.Year),0,0)
+			health_data_streamgraph_key.forEach(
+				function(e){
+					temp_data[e] = parseFloat(d[e]);
+				})
+			return_data.push(temp_data);
+	});
+	
+	return [return_data,health_data_streamgraph_key];		
+}
+
+//Setup 
+var height = 0.95*window.innerHeight;
+var width_viz = 1.5* height;
+var width_interaction = 0.5 * height;
+
+var left_over_space = window.innerWidth - (2.0*height);
+var left = (left_over_space>0)?left_over_space/2:0;
+
+// Main Visualization SVG 
+var mainVisualizationCanvas = d3.select("#Main_Visualization")
+	.style("top",0.025*window.innerHeight)
+	.style("left",left +"px")
+	.append("svg")
+    .attr("id","main_visualization")
+    .attr("width",width_viz)
+    .attr("height",height)
+    .attr("xmlns","http://www.w3.org/2000/svg")
+    .attr("viewBox","0 0 1500 1000")
+    .attr("class", "mainsvg")
+    .style("background-color","#f9f6ea");
+
+var title_text = mainVisualizationCanvas.append("g")
+						.attr("id","Title")
+						.append("text")
+						.attr("x",750)
+						.attr("y",60)
+						.text("Sector Wise Gujarat GSDP")
+
+// Main Interaction Canvas Div
+var interactionmainCanvas = d3.select("#Interaction")
+	.style("left",(left+width_viz)+"px")
+	.style("top",0.025*window.innerHeight)
+	.style("background","rgb(241, 238, 226)")
+	.style("width",width_interaction)
+    .style("height",height);
+	
+// Interaction Canvas SVG
+var interactionCanvas= interactionmainCanvas.append("svg")
+    .attr("id","interaction")
+    .attr("width",width_interaction)
+    .attr("height",width_interaction/10)
+    .attr("xmlns","http://www.w3.org/2000/svg")
+    .attr("viewBox","0 0 500 50")
+    .attr("class", "mainsvg")
+    .style("background-color","rgb(241, 238, 226)");
+
+
+// // Stream Graph
+// // Visualization placeholder parameters
+var width_streamgraph = 1500;
+var height_streamgraph = 700;
+
+var width_interaction = 500;
+
+d3.queue()
+	.defer(d3.csv,"Data/Economy.csv")
+	.defer(d3.csv,"Data/Women_Safety.csv")
+	.defer(d3.csv,"Data/Literacy.csv")
+	.defer(d3.csv,"Data/Health.csv")
+	.defer(d3.csv,"Data/Political.csv")
+	.await(function(error,economy_data,safety_data,literacy_data,health_data,political_data)
+{
+
+	console.log(economy_data);
+	// Streamgragh insipired by Harry Stevens streamgraph, https://bl.ocks.org/HarryStevens/c893c7b441298b36f4568bc09df71a1e
+	var which_domain = "Economy";
+	
+	which_data = economy_viz_data(economy_data);
+	implementer("Economy",which_data);
+
+	/************** INTERACTION CANVAS *****************/
+	
+	var sc_domain_selector = interactionCanvas.append("g")
+     								.attr("id","sc_domain_selector")
+
+ 	var final_selection_rect = sc_domain_selector.append("g")
+ 								.attr("id","final_rect")
+ 								.append("rect")
+ 								.attr("x",100)
+ 								.attr("y",0)
+ 								.attr("width",width_interaction-100)
+ 								.attr("height",50)
+ 								.attr("fill",function(){
+ 									var i = socio_economic_domains.findIndex(d=>d==which_domain);
+ 									return socio_economic_colors[i];
+ 								});
+ 								
+ 	var final_selection_text = 	sc_domain_selector.append("text")
+ 								.attr("class","sc_domain")
+ 								.text(which_domain.toUpperCase())
+ 								.attr("x",130)
+ 								.attr("y",40);
+
+ 	var s_width = 25;
+
+	var socio_economic_selectors = interactionCanvas.append("g")
+									.attr("id","socio_economic_selectors")
+									.selectAll("rect")
+									.data(socio_economic_domains)
+									.enter()
+									.append("rect")
+									.attr("x",function(d,i){
+										return i*s_width
+									})
+									.attr("y",0)
+									.attr("width",s_width)
+									.attr("height",50)
+									.attr("fill",function(d,i){
+										return socio_economic_colors[i];
+									})
+									.attr("stroke","rgb(241, 238, 226)")
+									.attr("stroke-width",2)
+									.on("mouseover",function(){
+										d3.select(this).attr("opacity",0.5)
+									})
+									.on("mouseout",function(){
+										d3.select(this).attr("opacity",1.0)
+									})
+									.on("click",function(d,i){
+										interaction_rendering(d,i);
+									})
+
+	interaction_rendering(which_domain,0);
+	function interaction_rendering(which_domain,i)
+	{
+		final_selection_rect.attr("fill",socio_economic_colors[i]);
+		final_selection_text.text(which_domain.toUpperCase());
+
+		var socio_economic_domains = ["Economy","Literacy","Women Safety","Health"];
+
+		var literacy_selectors = ["Schools","Enrollment","Teachers"];
+		var health_selectors = ["IMR","Birth Rate","Death Rate"]
+
+		var which_data;
+		switch(which_domain){
+			case("Economy") : {
+					which_data = economy_viz_data(economy_data);
+					implementer("Economy",which_data);
+					title_text.text("Sector Wise Gujarat GSDP")
+			}break;
+			case("Literacy"): {	
+					var ls_i = 0;		
+					which_data =literacy_viz_data(ls_i,literacy_data);
+					implementer("Literacy",which_data);
+			}break;
+			case("Women Safety"): {
+					which_data =safety_viz_data(safety_data);
+					implementer("Women_Safety",which_data);
+					title_text.text("Incidences of Crime Against Women in Gujarat")
+			}break;
+			case("Health"): {
+					var hs_i = 0;
+					which_data = health_viz_data(hs_i,health_data);
+					implementer("Health",which_data);
+			}break;
+		}
+
+		// Cleaning up the text earlier
+		interactionmainCanvas.select("#parameter_description").remove();
+
+		var main = interactionmainCanvas.append("g")
+						.attr("id","parameter_description")
+
+		if(which_domain == "Economy")
+		{
+ 			
+			var text = 	"The economic development of the state of Gujarat over the last two decades can be quantitatively assesed using <b>GSDP</b> (Gross State Domestic Product). <br> The streamgraph on the right visualizes the GSDP (in Rupees) of Gujarat from 1998 onwards. <br><br> <b> GSDP </b>is defined as a measure, in monetary terms, of the volume of all goods and services produced within the boundaries of the State during a given period of time, accounted without duplication.<br> <br> Cumulative GSDP of a state is evaluated by aggregating GSDPs associated with different sectors. The sectors which are mapped to different colors in the visualization are : <br><br> <b> " ;
+
+	 		which_data[1].forEach((d,i)=>{
+	 				text += "<font color="+colorrange[i]+">&#x275A "+d + "</font><br>";})	
+
+			var main_description = main.append("div")
+										.attr("id","main_description")
+										.html(text);
+
+		}
+
+		else if (which_domain == "Women Safety")
+		{
+			var text = 	"Women Safety is one of the prime concerns prevalent in the Indian Society. The number incidences of crime against women reflects on the inequality and negligence of the government in executing policies and reforms. <br><br> The National Crimes Record Bureau (NCRB) has collected data of reported <b> incidences of crimes against women </b> in different forms from 1998 onwards. On the left side of the screen is a visualization of this incidence based data. <br><br> NCRB segregates the crime data according to the nature of the crime into the following : <br><br> <b>" ;
+
+	 		which_data[1].forEach((d,i)=>{
+	 				text += "<font color="+colorrange[i]+">&#x275A "+d.split("_").join(" ") + "</font><br>";})
+
+	 		var main_description = main.append("div")
+										.attr("id","main_description")
+										.html(text);
+		}
+
+		else if (which_domain == "Literacy")
+		{
+			var text = 	"Education is an effective indicator of the development of a nation. Propagation of Education and improvement of Literacy are an important aspect on the agenda list of governments.<br><br> NITI Aayog (National Institution of Transforming India) has collected data of the enrollment, number of schools and number of teachers of different states in India. There are various missing data points resulting in a 0 count in those years. On the right we visualize the data for Gujarat collected for Primary Education. <b>You can select which of the following parameters is to be visualized : <br><br> " ;
+
+	 		var main_description = main.append("div")
+										.attr("id","main_description")
+										.html(text);
+
+			var buttons = main.append("div")
+								.attr("id","para_selection");
+
+			var butt = buttons.selectAll("div")
+					.data(literacy_selectors)
+					.enter()
+					.append("div");
+
+				butt.append("div")
+					.attr("class","opt")
+					.style("position","absolute")
+					.style("top",function(d,i){
+						return ((6*i)+0.2)+"vw"
+					})
+					.style("opacity",function(d,i){
+						if(d=="Schools"){return 1.0}
+						else return 0.5;
+					})
+					.html(function(d,i){return "<b>&#x275A &#x275A " + d + "</b> <font color='#ffda2f'> <br> &nbsp &nbsp &#x275A Government </font> <br> <font color = '#f88a60'>&nbsp &nbsp &#x275A Private</font>"})
+					.on("click",function(d,i){
+						d3.selectAll(".opt").style("opacity",0.5);
+						d3.select(this).style("opacity",1.0);
+						which_data =literacy_viz_data(i,literacy_data);
+						implementer("Literacy",which_data);
+					})
+
+		} 
+		else if (which_domain == "Health")
+		{
+			var text = "NITI Aayog defines and collects various health parameter data in India anually. In this visualization we visualize three of these parameters: IMR (Infant Mortality Rate), Birth Rate and Death Rate. All the three parameters are segregated into Urban and Rural count according to the demography of the collection site. <br> <br> <b> IMR</b> compares the number of deaths of infants under one year old in a given year per 1,000 live births in the same year.<b>Birth rate</b> is the total number of live births per 1,000 of a population in a year.<b> Death Rate </b> is the number of deaths per 1,000 individuals per year. <br><br> <b>You can select which of the following parameters is to be visualized : <br> " ;
+
+	 		var main_description = main.append("div")
+										.attr("id","main_description")
+										.html(text);
+
+			var buttons = main.append("div")
+								.attr("id","para_selection");
+
+			var butt = buttons.selectAll("div")
+					.data(health_selectors)
+					.enter()
+					.append("div");
+
+				butt.append("div")
+					.attr("class","opt")
+					.style("position","absolute")
+					.style("top",function(d,i){
+						return ((6*i)+0.2)+"vw"
+					})
+					.style("opacity",function(d,i){
+						if(d=="IMR"){return 1.0}
+						else return 0.5;
+					})
+					.html(function(d,i){return "<b>&#x275A &#x275A " + d + "</b> <font color='#ffda2f'> <br> &nbsp &nbsp &#x275A Total </font> <br> <font color = '#f88a60'>&nbsp &nbsp &#x275A Rural</font><br> <font color = '#8da0cc'>&nbsp &nbsp &#x275A Urban</font>"})
+					.on("click",function(d,i){
+						d3.selectAll(".opt").style("opacity",0.5);
+						d3.select(this).style("opacity",1.0);
+						which_data = health_viz_data(i,health_data);
+						implementer("Health",which_data);
+					})
+
+		} //end here
+
+	}
+
+	function implementer(domain,which_data)
+	{
+
+		// Streamgraph
+    	/************************ VISUALIZATION CANVAS **************************/
+
+		//Cleaning
+		mainVisualizationCanvas.selectAll("#streamgraph").remove();
+		mainVisualizationCanvas.selectAll("#grid").remove();
+		mainVisualizationCanvas.selectAll("#Election").remove();
+		mainVisualizationCanvas.selectAll("#x_axis_years").remove();
+
+		var streamgraph_canvas = mainVisualizationCanvas.append("g")
+     								.attr("id","streamgraph")
+     								.attr("transform","translate(0,100)");
+
+		var stack = d3.stack()
+						.keys(which_data[1])
+						.order(d3.stackOrderReverse)
+						.offset(d3.stackOffsetSilhouette);
+						// .offset(d3.stackOffsetNone);
+
+    	var layers = stack(which_data[0]);
+
+    	var x_scale = d3.scaleTime()
+    					.range([0,width_streamgraph])
+    					.domain(d3.extent(which_data[0],function(d){return(d.Years)}));
+    	
+    	var y_scale = d3.scaleLinear()
+    					.range([0,height_streamgraph/2-40])
+    					// .range([0,height_streamgraph-150])
+    					.domain([d3.max(layers,function(d){return d3.max(d,function(e){return(e[1])});}),0]);
+
+
+  		// Grid
+    	var grid_line = d3.line()
+    						.x(function(d,i){return d.x})
+    						.y(function(d,i){return d.y});
+
+    	var grid = mainVisualizationCanvas.append("g")
+    									.attr("id","grid")
+    									.selectAll("path")
+    									.data(which_data[0])
+    									.enter()
+    									.append("path")
+    									.attr("id",function(d,i){
+    										return "line_"+d.Years.getFullYear();
+    									})
+    									.attr("d",function(d,i){
+    										var x = x_scale(d.Years)
+    										var first = {"x":x,"y":0};
+    										var sec = {"x":x,"y":970}
+    										var data_line = [first,sec];
+    										return grid_line(data_line);
+    									})
+    									.attr("stroke","black")
+    									.attr("stroke-width",3.0)
+    									.attr("opacity",0.04);
+    	
+    	// Elections and Parties 
+    	var elec_data = d3.nest()
+							.key(function(d,i){return d.Year})
+							.key(function(d,i){return d.Party})
+							.entries(political_data);
+
+		var elections = mainVisualizationCanvas.append("g")
+								.attr("id","Election");
+
+		var party_arc = d3.arc()
+					.innerRadius(55)
+					.outerRadius(70)
+					.startAngle(function(d,i){
+						return d.startAngle;
+					})
+					.endAngle(function(d,i){
+						return d.endAngle;
+					})
+
+		var election_arcs= elections.append("g")
+					.attr("id","Election_Arcs")
+					.selectAll("g")
+					.data(elec_data)
+					.enter()
+					.append("g")
+					.attr("id",function(d,i){
+						return "Election_"+d.key;
+					})
+					.attr("transform",function(d,i){
+						var date = new Date(parseInt(d.key),0,0)
+						var x = x_scale(date);
+						return "translate("+x+",970),rotate(-90)";
+					})
+					.selectAll("path")
+					.data(function(d,i){
+						var final_values = d.values.sort(function(x,y){
+							return d3.descending(x.values.length,y.values.length);
+						});
+						final_values.forEach((e,i)=>{
+							var start_index = 0 ; 
+							for (var m = 0 ; m < i ;m ++)
+							{
+								start_index += final_values[m].values.length;
+							}
+							e.startAngle = start_index*Math.PI/182; 
+							e.endAngle = (start_index+e.values.length)*Math.PI/182;
+						})
+						return final_values;
+					})
+					.enter()
+					.append("path")
+					.attr("id",function(d,i){
+						return "comp_arc_"+d.key
+					})
+					.attr("d", party_arc)
+					.attr("fill",function(d,i){
+						var index = parties.findIndex(e=>e==d.key);
+						return (party_colors[index]);
+					})
+					.attr('stroke',"#f9f6ea")
+					.attr("stroke-width",0.5)
+					.attr("opacity",1.0)
+
+		var elec_line = d3.line()
+    						.x(function(d,i){return d.x})
+    						.y(function(d,i){return d.y});
+
+		var election_lines = elections.append("g")
+								.attr("id","election_lines")
+				
+		var election_l = election_lines.selectAll("g")
+					.data(elec_data)
+					.enter()
+					.append("g");
+		
+		election_l.append("path")
+					.attr("d",function(d,i){
+						var date = new Date(parseInt(d.key),0,0)
+						var x = x_scale(date);
+						var f = {"x":x,"y":970};
+						var s = {"x":x,"y":800};
+						return elec_line([f,s]);
+					})
+					.attr("stroke","black")
+					.attr("stroke-width",2.0)
+					.attr("fill","black")
+					.attr("opacity",0.6);
+
+		election_l.append("path")
+					.attr("class","marker")
+					.attr("d",function(d,i){
+						var date = new Date(parseInt(d.key),0,0)
+						var x = x_scale(date);
+						var f = {"x":x,"y":970};
+						var s = {"x":x,"y":0};
+						return elec_line([f,s]);
+					})
+					.attr("stroke","black")
+					.attr("stroke-width",2.0)
+					.attr("fill","black")
+					.attr("opacity",0.2);
+
+		election_l.append("rect")
+					.attr("id",function(d,i){
+						return "rect_"+d.key;
+					})
+					.attr("x",function(d,i){
+						var date = new Date(parseInt(d.key),0,0)
+						var x = x_scale(date);
+						return x-70;
+					})
+					.attr("y",775)
+					.attr("width",140)
+					.attr("height",20)
+					.attr("fill","white")
+					.attr("opacity",0.9)
+
+		election_l.append("text")
+				.attr("class","election_text")
+				.attr("id",function(d,i){
+					return "election_text_"+d.key;
+				})
+				.text(function(d,i){
+					return "Elections "+d.key;
+				})
+				.attr("x",function(d,i){
+					var date = new Date(parseInt(d.key),0,0)
+					var x = x_scale(date);
+					return x;
+				})
+				.attr("y",790)
+
+		election_l.append("circle")
+				.attr("class","election_circle")
+				.attr("cx",function(d,i){
+					var date = new Date(parseInt(d.key),0,0)
+					var x = x_scale(date);
+					return x;
+				})
+				.attr("cy",800)
+				.attr("r",5)
+				.attr("fill","#e0e03e")
+				.on('mouseover',function(d,i){
+					d3.select("#election_text_"+d.key)
+						.style("font-size","20px")
+						.attr("y",function(d,i){
+							return 790 - (d.values.length*16)
+						})
+						.selectAll("tspan")
+						.data(d.values)
+						.enter()
+						.append("tspan")
+						.attr("class","election_internal")
+						.text(function(e,i){
+							var t = e.key + " : " + e.values.length;
+							return t;
+						})
+						.attr("x",function(e,i){
+							var year = e.values[0].Year;
+							var date = new Date(parseInt(year),0,0)
+							var x = x_scale(date);
+							return x;
+						})
+						.style("fill",function(e,i){
+							var index = parties.findIndex(f=>f==e.key);
+							return (party_colors[index]);
+						})
+						.attr("y",function(e,i){
+							return 790 - (i * 16);
+						});
+
+					d3.select("#rect_"+d.key)
+						.attr("y",function(d,i){
+							var h = d.values.length*15;
+							return (775-h-15) ; 
+
+						})
+						.attr("height",function(d,i){
+							var h = d.values.length*15;
+							return(20+h+15);
+						})
+
+				})
+				.on("mouseout",function(d,i){
+
+					var sel = d3.select("#election_text_"+d.key);
+						sel.style("font-size","15px")
+						.attr("y",790);
+						sel.selectAll("tspan").remove();
+
+					d3.select("#rect_"+d.key)
+						.attr("y",775)
+						.attr("height",20)
+				})
+
+    	
+    	// Streamgraph
+    	var area = d3.area()
+    			.curve(d3.curveCardinal.tension(0.6))
+    			.x(function(d) { 
+    				return x_scale(d.data.Years); })
+    			.y1(function(d) { return y_scale(d[0]);})
+    			.y0(function(d) { return y_scale(d[1]);});
+    	
+    	var tooltip_line = d3.select("body").append("div")
+    								.attr("class","tooltip_line")
+    								.style("visibility","hidden")
+    								.style("position","absolute")
+    								.style("top",0.025*window.innerHeight)
+    								.style("width",5)
+    								.style("height",height)
+    								.style("opacity",0.7)
+    								.style("background-color","white")
+
+    	var tooltip_text = d3.select("body").append("div")
+    								.attr("class","tooltip")
+    								.style("visibility","hidden");
+
+    	var streams = streamgraph_canvas.selectAll("path")
+    									.data(layers)
+    									.enter()
+    									.append("path")
+    									.attr("class","stream")
+    									.attr("id",function(d){ return (d.key+"_stream")})
+    									.attr("d",function(d){ return area(d)})
+    									.attr("fill",function(d,i){
+    										return colorrange[i];
+    									})
+    									.attr("opacity",1.0)
+    									.attr("stroke","white")
+    									.attr("stroke-width",0.6)
+    									.on("mouseover",function(d,i){
+    										$(".stream").attr("opacity",0.6);
+    										$(this).attr("opacity",1);
+
+    									})
+    									.on("mouseout",function(d,i){
+    										$(".stream").attr("opacity",1);
+    									tooltip_text.style("visibility","hidden");
+    									tooltip_line.style("visibility","hidden");
+    									})
+    									.on("mousemove",function(d,i){
+    									var displacement = 30; 
+
+    									// with respect to svg - to invert scale
+    									var x_position = d3.mouse(this)[0] + ((displacement*width_streamgraph)/width_viz);   
+
+    									// with respect to the whole page - to draw div							
+    									var x_position_page = event.clientX + displacement;
+    									var tooltip_line_x = x_position_page;
+    									var tooltip_text_x = x_position_page;
+
+    									if (tooltip_text_x > 3*width_viz/4) {
+    										tooltip_text_x = tooltip_text_x - 210;
+    									}
+    				
+    									var year = x_scale.invert(x_position).getFullYear();
+    									var category = d.key;
+    									var value_index = d.findIndex(data=>data.data.Years.getFullYear()==year);
+
+    									var value = d[value_index].data[category];
+    				
+    									var text = "<div class='year'>" + year + "</div><div class='key'><div style='background:" + colorrange[i] + "' class='swatch'>&nbsp;</div> <div class='category'>" + which_data[1][i].split("_").join(" ") ; 
+
+    									console.log(domain);
+    									if(domain=="Economy")
+										{
+											text += "</div><div class='value'> GSDP : " + value + " Lakh &#8377 " + "</div>";
+										}
+    									else if (domain == "Women_Safety")
+    									{
+    										console.log("Yes");
+    										text += "</div><div class='value'> Incidents : " + value  + "</div>";
+    									}
+    									else if (domain == "Literacy")
+    									{
+    										text += "</div><div class='value'> Count " + value + "</div>";
+    									}
+    									else if (domain == "Health")
+    									{
+    										text += "</div><div class='value'> Value " + value + "</div>";
+    									}
+
+    									tooltip_text.style("visibility","visible")
+    												.html(text)
+    												.style("left", tooltip_text_x + "px")
+               										.style("top",0.025*window.innerHeight)
+
+               							tooltip_line.style("visibility","visible")
+               								.style("left", tooltip_line_x+ "px");
+    									
+    									});   
+
+    	// Axis
+    	var x_axis = mainVisualizationCanvas.append("g")
+    				.attr("id","x_axis_years")
+      				.attr("transform", "translate(0," + 970 + ")")
+      				.call(d3.axisBottom(x_scale))
+      				.attr("opacity",0.5);
+			
+	} // end of implementer function 
+
+}); // end of data loading 
+
+</script>	
+
+
+</body>
+</html>

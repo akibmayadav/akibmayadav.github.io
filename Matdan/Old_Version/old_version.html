@@ -1,0 +1,1002 @@
+<!-- 
+Data Sources 
+1. Open Government Data, India
+2. IndiaStat.com 
+3. NITI Ayog India - State Statistics s
+ -->
+<html>
+<head>
+<title> SLIDE- 1 TO 9</title>
+</head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<link rel="stylesheet" type="text/css" href="Style/main_old_version.css">
+<body>
+<img id= "left_arrow" src = "Assets/arr.png" onClick="left_move()">
+<img id= "right_arrow" src = "Assets/arr.png" onClick="right_move()">
+<div id="mainVisualization" style= "position:absolute"></div>
+<div id="slide1introductionText" style= "position:absolute"></div>
+<div id="centerintroductionText" style= "position:absolute"></div>
+<div id="introductionText" style= "position:absolute"></div>
+<div id="selectionText" style= "position:absolute"></div>
+<script>
+
+var current_url = window.location.href;
+var slider = 1; 
+
+var splitter_lev1 = current_url.split("?")[1]?current_url.split("?")[1]:0;
+if (splitter_lev1)
+{
+	slider = parseInt(splitter_lev1.split("=")[1]);
+}
+
+var which_slide = 0; 
+
+var left_move, right_move;
+
+var categories = ["GEN","SC","ST"];
+var category_colors = ['#dd6a6a','#4089ef','#3fc155'];
+
+var parties = ["INC","BJP","AIRJP","IND","JD","SP","JD(U)","NCP","BJNKP","GPP"];
+var party_colors = ['#66c2a5','#fc8d62','#8da0cb','#ffd92f','#e78ac3','#a6d854','#e5c494','#404040'];
+
+var width = window.innerWidth*0.8;
+var height = width*0.6;
+
+var top_center = (window.innerHeight - height)/2 ;
+var left_center = (window.innerWidth - width)/2 ;
+
+$('#mainVisualization').css("width",width);
+$('#mainVisualization').css("height",height);
+$('#mainVisualization').css("left",left_center);
+$('#mainVisualization').css("top",top_center);
+
+var i_width = 1000; 
+var i_height = 600;
+
+// SVG the visualization 
+var mainVisualizationCanvas = d3.select("#mainVisualization").append("svg")
+     .attr("id","main")
+     .attr("xmlns","http://www.w3.org/2000/svg")
+     .attr("viewBox","0 0 1000 600")
+     .attr("class", "mainsvg");
+
+// Text for the introduction of every slide 
+var text_margin =  {"top": 50};
+var slide_text = d3.select("#introductionText")
+					.style("width",width)
+					.style("left",left_center)
+					.style("top",text_margin.top)
+					.append("text");
+
+// Additional Hovering Text
+var bottomtext_margin =  {"bottom": 100};
+var bottomslide_text = d3.select("#selectionText")
+					.style("width",window.innerWidth)
+					.style("bottom",bottomtext_margin.bottom)
+					.append("text")
+					.attr("id","center_align");
+
+$('body').css("background-color","#f9f6ea");
+
+d3.csv("Data/Final_Political_Data.csv",function(error,data)
+
+{
+
+	left_move= function()
+	{
+	if ( slider >1) 
+	{ 
+		slider = slider-1;
+		slide_implement(slider); 
+	}
+	}
+
+	right_move = function()
+	{
+	if (slider <9) 
+	{ 
+		slider = slider+1;
+		slide_implement(slider);
+	}
+	else 
+	{
+		location.href="socio_economic.html"
+	}
+	
+	}
+	
+	function slide_implement(slider)
+	{
+		switch(slider) 
+		{
+		case 1 : slide_1(); break;
+		case 2 : slide_2(); break;
+		case 3 : slide_3(); break;
+		case 4 : slide_4(); break;
+		case 5 : slide_5(); break;
+		case 6 : slide_6(); break;
+		case 7 : slide_7(); break;
+		case 8 : slide_8(); break;
+		case 9 : slide_9(); break;
+		}
+	}
+
+	var margin = {"top": 230, "bottom":130 , "left":70, "right":35};
+
+	var years = d3.nest()
+				.key(function(d) {return d.Year})
+				.entries(data);
+
+
+	var constituency = d3.nest()
+				.key(function(d) {return d.AC_Name})
+				.entries(data);
+	console.log(constituency)
+	
+	// For Vertical Scale
+	var year_extent = d3.extent(years,function(d,i){return(parseInt(d.key))});
+
+	var y_scale = d3.scaleLinear()
+					.domain(year_extent)
+					.range([i_height-margin.top-margin.bottom,0]);
+	// Year Labels 
+	mainVisualizationCanvas.append("g")
+								.attr("id","Year_Label")
+								.selectAll("text")
+								.data(years)
+								.enter()
+								.append("text")
+								.attr("transform","translate("+25+","+margin.top+")")
+								.text(function(d,i){
+									return d.key})
+								.attr("y",function(d,i){return(y_scale(d.key)+6)});
+
+	var constituency_extent = d3.max(years,function(d,i){return(d.values.length)});
+
+
+	var constituency_rect_width = (i_width-margin.left-margin.right)/constituency_extent;
+	var constituency_rect_height = 25;
+
+	var constituency_grid = mainVisualizationCanvas.append("g")
+									.attr("id","constituency_grid")
+									.style("position","absolute")
+									.attr("transform","translate("+margin.left+","+margin.top+")");
+
+	var constituencies_year = constituency_grid.selectAll("g")
+								.data(years)
+								.enter()
+								.append("g")
+								.attr("id",function(d,i){return d.key});
+
+	var constituencies = constituencies_year.selectAll("rect")
+								.data(function(d,i){return d.values})
+								.enter()
+								.append("rect")
+								.attr("class","const_rects")
+								.attr("id",function(d,i){
+									return d.Year+"_"+d.AC_Name})
+
+	slide_implement(slider);
+	
+	function slide_1()
+	{
+		$("#Year_Label").attr("opacity",0);
+		which_slide = 1; 
+
+		$("#centerintroductionText").html("<b><font color='#e0dd2a'><font size='40vw'> MATDAN </font></font></b><br><font size='3vw'>Educating the Electorate</font>")
+
+	}
+
+	function slide_2()
+	{
+		// Clearing Slide 3
+		slide_text.html("");
+		$("#Year_Label").attr("opacity",0);
+
+		which_slide = 2; 
+		$("#centerintroductionText").html("India is the largest democracy in terms of the population in the world. But it is a <b> FLAWED DEMOCRACY </b> as the electorate, that is we the people are not educated and informed about the vote we cast. <br><br> We the citizens of India are bringing in a revolution to transition this flawed democracy to a real democracy. Matdan is designed to catalyze this revolution starting from the upcoming <br><br> <b> <font color='#e0dd2a'> GUJARAT LEGISLATIVE ELECTIONS 2018 </font></b><br> <br>Matdan brings you the performance of governments over the years and analysis of manifestos of the parties contesting in the upcoming elections, so that you can make a better choice.");
+
+	}
+
+	function slide_3()
+	{
+		which_slide = 3; 
+
+		//Clearing Slide 1
+		$("#centerintroductionText").html("");
+
+		//Clearing slide 4
+		bottomslide_text.html("");
+		slide_text.html("Gujarat State Legislative Elections are held every <b> 5 Years. </b> We get a chance to make a decision about who we want our leader to be once every 5 years. In the past few years in Gujarat we made this decision in 2012, 2007, 2002 and 1998");
+		$("#Year_Label").attr("opacity",1);
+
+	}
+	
+
+	function slide_4()
+	{
+		which_slide = 4; 
+		slide_text.html("The government has divided the state of Gujarat into geographic areas holding <b>EQUAL POPULATION</b> These areas are called <b> CONSTITUENCIES.</b> There are <b><font color='#e0dd2a'> 182 </font></b> constituencies in Gujarat.")
+
+		// Clearing Slide 5
+		bottomslide_text.html("");
+		constituency_grid.attr("opacity",0);
+		$("#Year_Label").attr("opacity",0);
+
+	}
+
+	//////////////////////// INTRO CONTINUOS WINNING CAND CONSTITUENCY SLIDE ///////////////////////	
+	function slide_5()
+	{
+		which_slide = 5; 
+		d3.selectAll("#constLabel").remove();
+		bottomslide_text.html("");
+
+		// Activating Slide Grids
+		constituency_grid.attr("opacity",1);
+		$("#Year_Label").attr("opacity",1);
+
+		// For Continuosly winning candidates and generic visualization explanation
+		slide_text.html("During every legislative election, the people of every constituency select a <b>LEADER (MLA)</b> for themselves. The <b>LEADER (MLA)</b> represents the interests and concerns of the people at the Vidhan Sabha.")
+
+		constituencies.attr("x",function(d,i){
+									return (i*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill","#e0dd2a")
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",1.0);
+
+		constituencies.on("mouseover",mouseover)
+					.on("mouseout",mouseout);
+			candidate_lines_drawing();
+		
+	}
+	
+//////////////////////// CATEGORY CONSTITUENCY SLIDE ///////////////////////
+
+	function slide_6()
+	{
+		//Whether a category is GEN,SC or ST type depending on the population
+			which_slide = 6; 
+			d3.selectAll("#Candidate_Lines").remove();
+			$("#histomap_polygon").remove();
+			bottomslide_text.html("");
+
+			slide_text.html("Depending on the population distribution is every constituency, the constituency is reserved for <b><font color='#dd6a6a'> GEN </font></b>, <b><font color='#4089ef'> SC </font></b> and <b><font color='#3fc155'> ST </font></b> category. This assignment changes over years.")
+
+
+			var nested_category_data =  d3.nest()
+				.key(function(d) {return d.Year})
+				.key(function(d) {return d.AC_Type})
+				.entries(data);
+
+			for (var a = 0; a<nested_category_data.length ;a++)
+			{
+				var year = nested_category_data[a].key;
+				nested_category_data[a].GEN = nested_category_data[a].values[0].values.length;
+				nested_category_data[a].SC = nested_category_data[a].values[1].values.length;
+				nested_category_data[a].ST = nested_category_data[a].values[2].values.length;
+			}
+
+			constituencies.attr("x",function(d,i){
+									return (i*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill",function(d,i){
+									
+									var color = category_colors[categories.indexOf(d.AC_Type)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",1.0);
+
+			var constituencies_label = constituency_grid.append("g")
+								.attr("id","constLabel")
+								.selectAll("text")
+								.data(nested_category_data)
+								.enter()
+								.append("text")
+								.attr("id",function(d,i){return ("constLabel_"+d.key)})
+								.html(function(d,i){
+									var n_i = nested_category_data.findIndex(data=>data.key == d.key);
+									var final_text = "GEN:"+nested_category_data[n_i].GEN +" | SC:"+nested_category_data[n_i].SC+" | ST:"+nested_category_data[n_i].ST;
+									return(final_text);
+								})
+								.attr("x",(i_width-margin.left-margin.right)/2)
+								.attr("y",function(d,i){
+									var year = parseInt(d.key);
+									return (y_scale(year)-15);
+								});
+
+	}
+
+//////////////////////// CATEGORY SORTED CONSTITUENCY SLIDE ///////////////////////
+
+	function sortedslide_6()
+	{
+		//Whether a category is GEN,SC or ST type depending on the population
+			which_slide = 6; 
+			d3.selectAll("#Candidate_Lines").remove();
+			bottomslide_text.html("");
+
+			slide_text.html("Depending on the population distribution is every constituency, the constituency is reserved for <b><font color='#dd6a6a'> GEN </font></b>, <b><font color='#4089ef'> SC </font></b> and <b><font color='#3fc155'> ST </font></b> category. This assignment changes over years.")
+
+			var nested_category_data =  d3.nest()
+				.key(function(d) {return d.Year})
+				.key(function(d) {return d.AC_Type})
+				.entries(data);
+
+			for (var a = 0; a<nested_category_data.length ;a++)
+			{
+				var year = nested_category_data[a].key;
+				nested_category_data[a].GEN = nested_category_data[a].values[0].values.length;
+				nested_category_data[a].SC = nested_category_data[a].values[1].values.length;
+				nested_category_data[a].ST = nested_category_data[a].values[2].values.length;
+			}
+
+			constituencies.attr("x",function(d,i){
+									var n_i = nested_category_data.findIndex(data=>data.key == d.Year);
+									var c_i = nested_category_data[n_i].values.findIndex(data=>data.key == d.AC_Type);
+									var index = nested_category_data[n_i].values[c_i].values.findIndex(data=>data.AC_Name==d.AC_Name);
+									var offset = 0 ; 
+									if (d.AC_Type == "SC")
+									{
+										offset = nested_category_data[n_i].GEN;
+									}
+									if (d.AC_Type == "ST")
+									{
+										offset = nested_category_data[n_i].GEN+nested_category_data[n_i].SC;
+									}
+									return ((index+offset)*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill",function(d,i){
+									
+									var color = category_colors[categories.indexOf(d.AC_Type)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",1.0);
+	}
+
+//////////////////////// PARTY WINNERS CONSTITUENCY SLIDE ///////////////////////
+
+	function unsortedslide_7()
+	{
+		//Whether party won the election in that constituency.
+
+			which_slide = 7; 
+			d3.selectAll("#constLabel").remove();
+			bottomslide_text.html("");
+
+			var party_text = 'The candidate elected in every constituency also represents a political party. The major political parties in Gujarat are ';
+
+			for (var a = 0 ; a<party_colors.length; a++)
+			{
+				if(a<party_colors.length-1)
+				{
+					party_text = party_text + '<b><font color="' +  party_colors[a]+ '">' + parties[a] + ", </b></font>";
+				}
+				else 
+				{
+					party_text = party_text + 'and <b><font color="' +  party_colors[a]+ '">' + parties[a] + " . </b></font>";
+				}
+			}
+
+			slide_text.html(party_text);
+
+			constituencies.attr("x",function(d,i){
+									// console.log(d,i);
+									return (i*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill",function(d,i){
+									
+									var color = party_colors[parties.indexOf(d.Party)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",0.7);
+	}
+
+//////////////////////// PARTY WINNERS SORTED CONSTITUENCY SLIDE ///////////////////////
+
+	function slide_7()
+	{
+		//Whether party won the election in that constituency.
+			// Write code to make the various parties array. ( Hardcoded right now)
+
+			which_slide = 7; 
+			d3.selectAll("#constLabel").remove();
+			bottomslide_text.html("");
+
+			var party_text = 'The candidate elected in every constituency also represents a political party. The major political parties in Gujarat are ';
+
+			for (var a = 0 ; a<party_colors.length; a++)
+			{
+				if(a<party_colors.length-1)
+				{
+					party_text = party_text + '<b><font color="' +  party_colors[a]+ '">' + parties[a] + ", </b></font>";
+				}
+				else 
+				{
+					party_text = party_text + 'and <b><font color="' +  party_colors[a]+ '">' + parties[a] + " . </b></font>";
+				}
+			}
+
+			slide_text.html(party_text);
+
+			// For Sorting Data 
+			var nested_party_data =  d3.nest()
+				.key(function(d) {return d.Year})
+				.key(function(d) {return d.Party})
+				.entries(data);
+
+			for (var a = 0; a<nested_party_data.length ;a++)
+			{
+				var year = nested_party_data[a].key;
+				for ( var b= 0 ; b <parties.length ;b++)
+				{
+
+					var index_party = nested_party_data[a].values.findIndex(data=>data.key == parties[b])
+					if (index_party>=0)
+					{
+						nested_party_data[a][parties[b]] = nested_party_data[a].values[index_party].values.length;
+					}
+					
+				}
+			}
+
+			// For Histomap polygons
+			var histomap_data = [];
+
+			for ( var y = 0; y <nested_party_data.length-1 ;y++)
+			{
+				for ( var p = 0 ; p<parties.length ;p++)
+				{
+					var y0 = y_scale(nested_party_data[y].key)-constituency_rect_height/2
+					var y1 = y_scale(nested_party_data[y+1].key)+constituency_rect_height/2
+					
+					var current_party = parties[p];
+					var current_offset = 0;
+					var future_offset = 0; 
+					var current_party_end_offset = nested_party_data[y][parties[p]]?nested_party_data[y][parties[p]]:0;
+					var future_party_end_offset = nested_party_data[y+1][parties[p]]?nested_party_data[y+1][parties[p]]:0;
+
+					for ( var a = 0; a <p ;a++)
+					{
+						if(nested_party_data[y][parties[a]])
+						{
+							current_offset = current_offset+nested_party_data[y][parties[a]];
+
+						}
+						if(nested_party_data[y+1][parties[a]])
+						{
+							future_offset = future_offset+nested_party_data[y+1][parties[a]];
+						}
+					}
+					
+					var party_current_start =  current_offset;
+					var party_current_end = party_current_start + current_party_end_offset;
+					var party_future_start = future_offset; 
+					var party_future_end = party_future_start + future_party_end_offset;
+
+					var x0 = party_current_start*constituency_rect_width;
+					var x1 = party_current_end*constituency_rect_width;
+					var x2 = party_future_end*constituency_rect_width;
+					var x3 = party_future_start*constituency_rect_width;
+
+					var final_polygon_data={};
+					final_polygon_data.coord = x0+","+y0+" "+x1+","+y0+" "+x2+","+y1+" "+x3+","+y1;
+					final_polygon_data.color = party_colors[p]
+
+					histomap_data.push(final_polygon_data);
+
+				}
+
+			}
+
+			// Sorted Constituencies Rect
+			constituencies.attr("x",function(d,i){
+
+									var n_i = nested_party_data.findIndex(data=>data.key == d.Year);
+									var c_i = nested_party_data[n_i].values.findIndex(data=>data.key == d.Party);
+									var index = nested_party_data[n_i].values[c_i].values.findIndex(data=>data.AC_Name==d.AC_Name);
+									var offset = 0 ; 
+
+									var which_party = parties.findIndex(data=> data == d.Party);
+
+									var party_present = nested_party_data[n_i].values.findIndex(data=> data.key == parties[m]);
+
+									for ( var m =0 ;m<which_party;m++)
+									{
+										var party_present = nested_party_data[n_i].values.findIndex(data=> data.key == parties[m]);
+
+										if(party_present>=0)
+										{
+											offset = offset +nested_party_data[n_i][parties[m]]
+										}
+										
+									}
+
+									return ((index+offset)*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill",function(d,i){
+									
+									var color = party_colors[parties.indexOf(d.Party)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",1.0);
+
+
+			// Appending histomap polygons
+    		var histomap_polygons = constituency_grid.append("g")
+								.attr("id","histomap_polygon")
+								.selectAll("polygon")
+								.data(histomap_data)
+								.enter()
+								.append("polygon")
+								.attr("points",function(d){return d.coord;})
+								.attr("fill",function(d,i){
+									return d.color
+								})
+								.attr("opacity",0.3)
+    							.attr("stroke","black")
+    							.attr("stroke-width",0.1);
+	}
+
+//////////////////////// WOMEN WINNERS CONSTITUENCY SLIDE ///////////////////////
+
+	function slide_8()
+	{
+		//Women winning elections
+			which_slide = 8; 
+
+			// Slide 7 removal 
+			$("#histomap_polygon").remove();
+			// Slide 9 removal 
+			$("#Average_Turnout_Lines").remove();
+			$("#Average_Turnout_Labels").remove();
+			bottomslide_text.html("");
+
+			var sex_data =  d3.nest()
+				.key(function(d) {return d.Year})
+				.key(function(d) {return d.Sex})
+				.entries(data);
+
+			var sex_text = "The <b>WOMEN</b> candidates winning the elections tripled from 4 candidates in 1998 to 12 in the year 2002 and the trend continues from then onwards. Out of the 182 candidates in the year 1998, 2002, 2007 and 2012 there were <b>";
+
+			for (var a =0; a<sex_data.length ; a++)
+			{
+
+				if (a < sex_data.length -2)
+				{
+					sex_text = sex_text + sex_data[a].values[1].values.length + ", ";
+				}
+				else if (a < sex_data.length -1)
+				{
+					sex_text = sex_text + sex_data[a].values[1].values.length + " and ";
+				}
+				else
+				{
+					sex_text = sex_text + sex_data[a].values[1].values.length + "</b>";
+				}
+				
+			} 
+			
+			slide_text.html(sex_text+" women candidates.");
+
+			constituencies.attr("x",function(d,i){
+									return (i*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",constituency_rect_height)
+								.attr("fill",function(d,i){
+									
+									var color = party_colors[parties.indexOf(d.Party)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",function(d,i){
+									var opac = 0.05;
+									if(d.Sex=="F"){
+										opac = 1.0;
+									}
+									return opac;
+								});
+	}
+
+//////////////////////// VOTER TURNOUT CONSTITUENCY SLIDE ///////////////////////
+
+	function slide_9()
+	{
+		//Voter Turnout
+			which_slide = 9; 
+			bottomslide_text.html("");
+			var slidee_text = "Is every voter of the constituency coming out on the Election Day to cast a vote? Every vote from every member of the constituency is important. These votes are what make the government.";
+
+			slide_text.html(slidee_text);
+
+			var turnout_scale = d3.scaleLinear()
+									.domain([0,100])
+									.range([0,constituency_rect_height])
+
+			var mean_voter_turnouts = []
+			for ( var y = 0 ; y< years.length ;y++)
+			{
+				var mean_turn = d3.mean(years[y].values,function(d){return(d.Turnout)});
+				var final = {"Year" : years[y].key ,"Mean_VoterTurnout" : mean_turn};
+				mean_voter_turnouts.push(final);
+			}
+
+			// For Sorting Data 
+			var nested_party_data =  d3.nest()
+				.key(function(d) {return d.Year})
+				.key(function(d) {return d.Party})
+				.entries(data);
+
+			for (var a = 0; a<nested_party_data.length ;a++)
+			{
+				var year = nested_party_data[a].key;
+				for ( var b= 0 ; b <parties.length ;b++)
+				{
+
+					var index_party = nested_party_data[a].values.findIndex(data=>data.key == parties[b])
+					if (index_party>=0)
+					{
+						nested_party_data[a][parties[b]] = nested_party_data[a].values[index_party].values.length;
+					}
+					
+				}
+			}
+
+			constituencies.attr("x",function(d,i){
+									var n_i = nested_party_data.findIndex(data=>data.key == d.Year);
+									var c_i = nested_party_data[n_i].values.findIndex(data=>data.key == d.Party);
+									var index = nested_party_data[n_i].values[c_i].values.findIndex(data=>data.AC_Name==d.AC_Name);
+									var offset = 0 ; 
+
+									var which_party = parties.findIndex(data=> data == d.Party);
+
+									var party_present = nested_party_data[n_i].values.findIndex(data=> data.key == parties[m]);
+
+									for ( var m =0 ;m<which_party;m++)
+									{
+										var party_present = nested_party_data[n_i].values.findIndex(data=> data.key == parties[m]);
+
+										if(party_present>=0)
+										{
+											offset = offset +nested_party_data[n_i][parties[m]]
+										}
+										
+									}
+
+									return ((index+offset)*constituency_rect_width);
+								})
+								.attr("y",function(d,i){return(y_scale(d.Year)-turnout_scale(d.Turnout)+constituency_rect_height/2)})
+								.attr("width",constituency_rect_width)
+								.attr("height",function(d,i){
+									return turnout_scale(d.Turnout)
+								})
+								.attr("fill",function(d,i){
+									
+									var color = party_colors[parties.indexOf(d.Party)];
+									return color;
+
+								})
+								.attr("stroke","white")
+								.attr("stroke-width",0.6)
+								.attr("opacity",1.0)
+								.attr("turnout",function(d,i){
+									return parseInt(d.Turnout);
+								});
+
+			var mean_average_label = constituency_grid.append("g")
+							.attr("id","Average_Turnout_Labels")
+							
+			mean_average_label.selectAll("line")
+							.data(mean_voter_turnouts)
+							.enter()
+							.append("line")
+							.attr("id",function(d,i){return(d.Year+"_Turnout_Line")})
+							.attr("x1",0)
+							.attr("y1",function(d,i){
+								return (y_scale(d.Year)-turnout_scale(d.Mean_VoterTurnout)+constituency_rect_height/2)
+							})
+							.attr("x2",function(d,i){
+								var index = years.findIndex(data=>data.key==d.Year);
+								var count = years[index].values.length;
+								return (count+1)*constituency_rect_width;
+							})
+							.attr("y2",function(d,i){
+								return(y_scale(d.Year)-turnout_scale(d.Mean_VoterTurnout)+constituency_rect_height/2)
+							})
+							.attr("stroke","black")
+							.attr("stroke-width",1)
+							.attr("opacity",0.3)
+						
+			mean_average_label.selectAll("text")
+							.data(mean_voter_turnouts)
+							.enter()
+							.append("text")				
+							.attr("class", "Mean_Label")
+							.attr("x",function(d,i){
+								var index = years.findIndex(data=>data.key==d.Year);
+								var count = years[index].values.length;
+								return (count+1.5)*constituency_rect_width;
+							})
+							.attr("y",function(d,i){
+								return(y_scale(d.Year)-turnout_scale(d.Mean_VoterTurnout)+constituency_rect_height-5)
+							})
+							.text(function(d,i){return Math.round(d.Mean_VoterTurnout) +"%"})
+
+			mean_average_label.append("g")
+							.attr("id","tooltip")
+							.selectAll("text")
+							.data(years)
+							.enter()
+							.append("text")
+							.attr("id",function(d,i){
+								return d.key+"_tooltip"
+							})
+							.attr("y",function(d,i){
+								return y_scale(parseInt(d.key))-20;
+							});
+
+			constituencies.on("mouseover",mouseover)
+							.on("mouseout",mouseout);
+	}
+
+
+
+//////////////////////// MOUSE CLICK FUNCTION FOR CONST BASED SLIDES ///////////////////////
+
+	// Tool Tip for Voter Turnout
+	function mouseover(d,i)
+		{
+				// Conditions have to be put it place here
+				if (which_slide == 5 )
+				{
+					d3.selectAll(".const_rects").attr("fill","#e0dd2a")
+					d3.select(this).attr("fill","grey");
+					var text = "<b> CONSTITUENCY : "+ d.AC_Name + "</br> </b>" +"MLA : " +d.Cand +" ("+d.Party+")";
+					bottomslide_text.html(text);
+				}
+				
+				if (which_slide == 6 )
+				{
+					// Reset 
+					d3.selectAll(".const_rects").attr("opacity",0.6)
+					d3.selectAll(".const_rects").attr("height",constituency_rect_height);
+
+					d3.select(this).attr("opacity",1.0);
+					d3.select(this).attr("height",constituency_rect_height*2.0);
+
+					for (var a = 0; a <years.length ;a++)
+					{
+						$("#"+years[a].key+"_"+d.AC_Name).attr("opacity",1.0);
+					}
+					var text = "<b> CONSTITUENCY : "+ d.AC_Name + "</br> </b>" +"MLA : " +d.Cand +" ("+d.Party+")";
+					bottomslide_text.html(text);
+				}
+
+				if (which_slide == 7 )
+				{
+					// Reset 
+					d3.selectAll(".const_rects").attr("opacity",0.4)
+					d3.selectAll(".const_rects").attr("height",constituency_rect_height);
+					d3.selectAll("#histomap_polygon").attr("opacity",0.3)
+
+					d3.select(this).attr("opacity",1.0);
+					d3.select(this).attr("height",constituency_rect_height*2.0);
+
+					// Highlight this constituency in every year
+					for (var a = 0; a <years.length ;a++)
+					{
+						$("#"+years[a].key+"_"+d.AC_Name).attr("opacity",1.0);
+					}
+					var cand_name = d.Cand.split("_").join(" ")
+
+					var text = "<b> CONSTITUENCY : "+ d.AC_Name + "</br> </b>" +"MLA : " +cand_name + "</br> </b>" +"PARTY : " + d.Party;
+					bottomslide_text.html(text);
+				}
+
+				if (which_slide == 8)
+				{
+
+					for (var a = 0; a <years.length ;a++)
+					{
+					for (var b = 0; b <years[a].values.length ;b++)
+						{
+							if (years[a].values[b].Sex == "F")
+							{
+								$("#"+years[a].key+"_"+years[a].values[b].AC_Name).attr("opacity",0.5)
+							}
+							else 
+							{
+								$("#"+years[a].key+"_"+years[a].values[b].AC_Name).attr("opacity",0.05)
+							}
+						}
+
+						
+					}
+
+					var cand_name = d.Cand.split("_").join(" ")
+					if(d.Sex == "F")
+						{
+							d3.select(this).attr("opacity",1.0);
+							var text = "<b> CONSTITUENCY : "+ d.AC_Name + "</br> </b>" +"MLA : " +cand_name + "</br> </b>" +"PARTY : " + d.Party;
+							bottomslide_text.html(text);
+						};
+				}
+
+				if (which_slide == 9 )
+				{
+					// Reset 
+					d3.selectAll(".const_rects").attr("opacity",0.2)
+					$("#tooltip").attr("opacity",1);
+					// Highlight this constituency in every year
+					for (var a = 0; a <years.length ;a++)
+					{
+						var x_t = $("#"+years[a].key+"_"+d.AC_Name)[0]? $("#"+years[a].key+"_"+d.AC_Name)[0]:0;
+						var x_pos = x_t?x_t.x.animVal.value:0; 
+						var text = x_t?(x_t.attributes[10]?x_t.attributes[10].nodeValue:x_t.attributes[9].nodeValue)+"%":"";
+						
+						$("#"+years[a].key+"_"+d.AC_Name).attr("opacity",0.6);
+						$("#"+years[a].key+"_tooltip").attr("x",x_pos-5)
+													.text(text)
+					}
+
+					d3.select(this).attr("opacity",1.0);
+					var text = "<b> CONSTITUENCY : "+ d.AC_Name + "</br> </b>" +"Voter Turnout : " +d.Turnout + "</br> </b>" +"PARTY : " + d.Party;
+					bottomslide_text.html(text);
+				}
+		}
+
+	function mouseout(d,i)
+	{
+		if(which_slide == 6)
+		{
+			constituencies.attr("opacity",1);
+			$(this).attr("height",constituency_rect_height);
+		}
+
+		if(which_slide == 7)
+		{
+			constituencies.attr("opacity",1);
+		}
+
+		if(which_slide ==8)
+		{
+			constituencies.attr("opacity",function(d,i){
+									var opac = 0.05;
+									if(d.Sex=="F"){
+										opac = 1.0;
+									}
+									return opac;
+								});
+		}
+		if(which_slide ==9)
+		{
+			d3.selectAll(".const_rects").attr("opacity",1.0);
+			bottomslide_text.html("");
+			$("#tooltip").attr("opacity",0);
+
+		}
+	}
+
+
+	function candidate_lines_drawing()
+		{
+		// Drawing Lines For Consecutive MLAs
+
+			var constituency = d3.nest()
+				.key(function(d) {return d.AC_Name})
+				.entries(data);
+
+			var candidates = d3.nest()
+				.key(function(d) {return d.Cand})
+				.entries(data);
+			
+			var line_candidates = []; // Candidates who won more than once.
+			for (var c = 0 ; c< candidates.length ;c++)
+			{
+				if(candidates[c].values.length > 1)
+					{
+						line_candidates.push(candidates[c]);
+					};
+			}
+
+			var cand_line = d3.line()
+							.x(function(d){
+								var y_index = years.findIndex(data=>data.key == d.Year);
+								var c_index = years[y_index].values.findIndex(data=>data.AC_Name == d.AC_Name);
+								var final_x = c_index*constituency_rect_width + (constituency_rect_width/2)
+								return(final_x);
+							})
+							.y(function(d){
+								var final_y = y_scale(d.Year);
+								return(final_y);
+							})
+			
+			var candidate_lines = constituency_grid.append("g")
+							.attr("id","Candidate_Lines")
+							.selectAll("g")
+							.data(line_candidates)
+							.enter()
+							.append("g")
+							.attr("id",function(d,i){
+								return(d.key)
+							});
+			
+			candidate_lines	.append("path")
+							.datum(function(d,i){return d.values})
+							.attr("d",cand_line)
+							.attr("class","cand_lines")
+							.attr("fill","none")
+							.attr("stroke","black")
+							.attr("stroke-width",2)
+							.attr("opacity",function(d,i){
+								var opacity = 0 ; 
+								switch(d.length){
+									case(2) : opacity =0.1 ; break; 
+									case(3) : opacity =0.3 ; break; 
+									case(4) : opacity =0.5 ; break; 
+								}
+								return opacity
+							})
+							.on("click",cand_line_click)
+
+			function cand_line_click(d,i)
+			{
+				d3.selectAll(".cand_lines").attr("stroke","black")
+								.attr("opacity",function(d,i){
+								var opacity = 0 ; 
+								switch(d.length){
+									case(2) : opacity =0.1 ; break; 
+									case(3) : opacity =0.3 ; break; 
+									case(4) : opacity =0.5 ; break; 
+								}
+								return opacity
+								})
+				
+				d3.select(this).attr("stroke","#db2e2e")
+								.attr("opacity",1.0);
+				
+			}
+		}
+
+});
+
+
+</script>	
+
+
+</body>
+</html>

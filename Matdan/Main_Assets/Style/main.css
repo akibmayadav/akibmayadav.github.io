@@ -1,0 +1,25 @@
+
+#selected_const_text
+{
+	position:absolute;
+    font-family: sans-serif;
+  	text-anchor:middle;
+  	font-size: 30px;
+  	text-decoration: underline;
+}
+
+#selected_candi_text
+{
+	position:absolute;
+    font-family: sans-serif;
+  	text-anchor:middle;
+  	font-size: 15px;
+}
+
+#selected_party_text
+{
+	position:absolute;
+    font-family: sans-serif;
+  	text-anchor:middle;
+  	font-size: 25px;
+}
